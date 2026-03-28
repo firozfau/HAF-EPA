@@ -4,8 +4,20 @@ from data_loader.load_datasets import load_datasets
 from process.normalize import normalize_datasets
 from knowledge_graph.build import kg_build
 from knowledge_graph.representation import kg_recommendation
+from process.employee_skill_mapping import emp_map_build
+from process.project_skill_mapping import project_map_build
+from process.mapping import employee_map,project_map
+from process.pair_creation import build_pairs_employee_project
+from process.feature_engineering import add_features
 
-from config import (KG_RECOMENDED_LIMIT,LIMIT_NUMBER,OUTPUT_DIR,KNOWLEDGE_RECOMMENDED_EXCEL)
+
+from config import (KG_RECOMMENDED_LIMIT,
+                    LIMIT_NUMBER,OUTPUT_DIR,
+                    KNOWLEDGE_RECOMMENDED_EXCEL,
+                    EMPLOYEE_SAMPLE_SIZE,
+                    PROJECT_SAMPLE_SIZE,
+                    RANDOM_STATE
+                    )
 import os
 
 
@@ -35,7 +47,7 @@ def main() -> None:
     )
 
     print("\n--- Projects sample (check employee_id) ---")  
-    kgr_data = kg_recommendation(nodes_df=kg_nodes, edges_df=kg_edges,  top_k=KG_RECOMENDED_LIMIT)
+    kgr_data = kg_recommendation(nodes_df=kg_nodes, edges_df=kg_edges,  top_k=KG_RECOMMENDED_LIMIT)
    
     sorted_kgr_data = kgr_data.sort_values(["project_id", "match_score"], ascending=[True, False])
     group_kgr_data = sorted_kgr_data.groupby("project_id")
@@ -46,6 +58,43 @@ def main() -> None:
 
     print("save:",KNOWLEDGE_RECOMMENDED_EXCEL)
    
+    # 4. Skill mapping
+    employee_skill_map = emp_map_build(employee_skills, skills)
+    project_skill_map = project_map_build(projects, project_skills, skills)
+   
+    employees_enriched = employee_map(data.employees, employee_skill_map)
+    projects_enriched = project_map(data.projects, project_skill_map)
+
+    # 5. Sampling
+
+    #a. employees sample 
+    employees_sample = employees_enriched.sample(
+        n=min(EMPLOYEE_SAMPLE_SIZE, len(employees_enriched)),
+        random_state=RANDOM_STATE
+    )
+
+    #b. filter projects with skills
+    projects_with_skills = projects_enriched[
+        projects_enriched["skill_name"].apply(len) > 0
+    ]
+
+    #c. projects sample 
+    projects_sample = projects_with_skills.sample(
+        n=min(PROJECT_SAMPLE_SIZE, len(projects_with_skills)),
+        random_state=RANDOM_STATE
+    )
+
+    #6. Employee-project pair creation
+    #pairs_df = all employee-project combinations + their data (features)
+    empp_pair_DataFrame = build_pairs_employee_project(employees_sample, projects_sample)
+
+    #7. Feature engineering
+
+    featured_DataFrame = add_features(empp_pair_DataFrame)
+    FEATURE_COLUMNS_1 = featured_DataFrame[["employee_id", "project_id","employee_skills", "project_skills","skill_match_score",]].head()
+    FEATURE_COLUMNS_2 = featured_DataFrame[["employee_id","project_id","skill_match_score","experience","experience_score","availability","availability_score",]].head()
+ 
+    print(FEATURE_COLUMNS_1)
 
 
 if __name__ == "__main__":
