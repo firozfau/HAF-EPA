@@ -21,7 +21,11 @@ KG_RECOMMENDED_LIMIT = 10       # Maximum number of KG-based recommendations per
 LIMIT_NUMBER = 10               # Generic limit for number of items (e.g., employees, projects, etc.)
 
 
-KNOWLEDGE_RECOMMENDED_EXCEL = "knowledge_recommended_data.xlsx"       
+KNOWLEDGE_RECOMMENDED_EXCEL = OUTPUT_DIR/"knowledge_recommended_data.xlsx"       
+FINAL_RECOMMENDED_EXCEL = OUTPUT_DIR/"final_recommendations.xlsx"
+HYBRID_RECOMMENDED_EXCEL = OUTPUT_DIR/"hybrid_recommendations.xlsx"
+ 
 TRAINED_MODEL = OUTPUT_DIR/"HAF-EPA.joblib"
+
 
 
