@@ -22,6 +22,6 @@ LIMIT_NUMBER = 10               # Generic limit for number of items (e.g., emplo
 
 
 KNOWLEDGE_RECOMMENDED_EXCEL = "knowledge_recommended_data.xlsx"       
-
+TRAINED_MODEL = OUTPUT_DIR/"HAF-EPA.joblib"
 
 
