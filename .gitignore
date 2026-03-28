@@ -1,0 +1,12 @@
+# Ignore system files
+.DS_Store
+
+# Ignore all files inside these folders
+datasets/*
+output/*
+.vscode/*
+
+# BUT keep the folders (using placeholder file)
+!datasets/.gitkeep
+!output/.gitkeep
+!.vscode/.gitkeep

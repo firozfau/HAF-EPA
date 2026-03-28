@@ -1,29 +1,51 @@
-from data_loader.load_datasets import load_datasets
-from models.train_model import initialize_training_pipeline
+from __future__ import annotations
+
+from data_loader.load_datasets import load_datasets 
+from process.normalize import normalize_datasets
+from knowledge_graph.build import kg_build
+from knowledge_graph.representation import kg_recommendation
+
+from config import (KG_RECOMENDED_LIMIT,LIMIT_NUMBER,OUTPUT_DIR,KNOWLEDGE_RECOMMENDED_EXCEL)
+import os
 
 
 def main() -> None:
-    print("HAF-EPA — Week 1 Setup")
-    print("=" * 40)
+    print("HAF-EPA Pipeline Starting...")
+    
+    # 1. Load raw datasets
+    data = load_datasets() 
 
-    dataset_info = load_datasets()
-    training_info = initialize_training_pipeline()
+    # 2. Normalize datasets
+    normalized_data = normalize_datasets(data)
+    employees = normalized_data["employees"]
+    projects = normalized_data["projects"]
+    tasks = normalized_data["tasks"]
+    employee_skills = normalized_data["employee_skills"]
+    project_skills = normalized_data["project_skills"]
+    skills = normalized_data["skills"]
 
-    print("\nDataset Loader Status:")
-    print(dataset_info)
+     # 3. represet knowledge graph from datasets
+    kg_nodes,  kg_edges = kg_build(
+        employees,
+        projects,
+        tasks,
+        employee_skills,
+        project_skills,
+        skills,
+    )
 
-    print("\nTraining Pipeline Status:")
-    print(training_info)
+    print("\n--- Projects sample (check employee_id) ---")  
+    kgr_data = kg_recommendation(nodes_df=kg_nodes, edges_df=kg_edges,  top_k=KG_RECOMENDED_LIMIT)
+   
+    sorted_kgr_data = kgr_data.sort_values(["project_id", "match_score"], ascending=[True, False])
+    group_kgr_data = sorted_kgr_data.groupby("project_id")
+    top_emp_kgr_data = group_kgr_data.head(LIMIT_NUMBER);
 
-    print("\nWeek 1 Deliverables Completed:")
-    print("- Project structure created")
-    print("- Initial dataset loading module prepared")
-    print("- Initial model training module prepared")
-    print("- Main entry file prepared")
-    print("- Dependencies documented")
+    file_path = os.path.join(OUTPUT_DIR, KNOWLEDGE_RECOMMENDED_EXCEL)
+    top_emp_kgr_data.to_excel(file_path, index=False)
 
-    print("\nNext Step:")
-    print("Proceed to Week 2: full dataset loading and validation.")
+    print("save:",KNOWLEDGE_RECOMMENDED_EXCEL)
+   
 
 
 if __name__ == "__main__":
