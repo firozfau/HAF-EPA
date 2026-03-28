@@ -5,3 +5,4 @@ matplotlib
 flask
 joblib
 pdfplumber
+openpyxl
