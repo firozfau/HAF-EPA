@@ -37,6 +37,7 @@ Raw Data
 → Train/Test Split (80/20)
 → Machine Learning Model (Random Forest)
 → Model Evaluation
+→ External Testing
 → Prediction Pipeline
 → Knowledge Graph Recommendation
 → Final Recommendation (ML)
@@ -49,38 +50,11 @@ Raw Data
 
 ```text
 HAF-EPA/
-│
 ├── data_loader/
-│   └── load_datasets.py
-│
 ├── process/
-│   ├── normalize.py
-│   ├── employee_skill_mapping.py
-│   ├── project_skill_mapping.py
-│   ├── mapping.py
-│   ├── pair_creation.py
-│   ├── feature_engineering.py
-│   └── lebel_employee_project.py
-│
 ├── models/
-│   ├── train_model.py
-│   ├── generate_train_model.py
-│   ├── evaluate_model.py
-│   ├── test_model.py
-│   ├── predict.py
-│   ├── final_recommendation.py
-│   └── hybrid_recommendation.py
-│
 ├── knowledge_graph/
-│   └── kg_recommend.py
-│
 ├── output/
-│   ├── HAF-EPA.joblib
-│   ├── held_out_test_data.joblib
-│   ├── knowledge_recommended_data.xlsx
-│   ├── final_recommendations.xlsx
-│   └── hybrid_recommendations.xlsx
-│
 ├── config.py
 ├── main.py
 └── README.md
@@ -92,18 +66,16 @@ HAF-EPA/
 
 ### 1️⃣ Data Loading
 
-* Load datasets:
-
-  * Employees
-  * Projects
-  * Tasks
-  * Skills
+* Employees
+* Projects
+* Tasks
+* Skills
 
 ---
 
 ### 2️⃣ Data Preprocessing
 
-* Data cleaning
+* Cleaning
 * Validation
 * Normalization
 * Skill mapping
@@ -122,8 +94,6 @@ Each row represents:
 
 ### 4️⃣ Feature Engineering
 
-Key features:
-
 * matched skill count
 * skill match score
 * experience score
@@ -135,8 +105,8 @@ Key features:
 
 ### 5️⃣ Label Generation
 
-* `1` → Suitable employee
-* `0` → Not suitable
+* `1` → Suitable
+* `0` → Not Suitable
 
 ---
 
@@ -144,28 +114,40 @@ Key features:
 
 ### Model Used
 
-* **Random Forest Classifier**
+* Random Forest Classifier
 
 ### Why Random Forest?
 
-* Works well with structured/tabular data
-* Handles **non-linear relationships**
-* Reduces overfitting (ensemble learning)
-* Requires minimal preprocessing
+* Works well with tabular data
+* Handles non-linear relationships
+* Reduces overfitting
+* No heavy preprocessing needed
 
 ---
 
 ## 📊 Training & Testing
 
-### Train-Test Split
+### 🔹 Train-Test Split Implementation
 
-* **80% Training Data**
-* **20% Unseen Testing Data**
+```python
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.2,
+    random_state=42,
+    stratify=y
+)
+```
 
-### Training Phase
+* 80% → Training
+* 20% → Internal Testing (Unseen Data)
 
-* Model learns from employee-project features
-* Model saved as:
+---
+
+### 🔹 Training Phase
+
+* Model learns from full dataset
+* Saved as:
 
 ```
 HAF-EPA.joblib
@@ -173,35 +155,41 @@ HAF-EPA.joblib
 
 ---
 
-### Testing Phase (Unseen Data)
+### 🔹 Internal Testing (Held-out 20%)
 
-* Uses **20% unseen data**
-* Ensures fair evaluation
-* Prevents data leakage
+* Uses unseen test data
+* Metrics:
+
+  * Accuracy
+  * Precision
+  * Recall
+  * F1-score
 
 ---
 
-## 📈 Model Evaluation Metrics
+## 🌍 External Testing (NEW)
 
-| Metric           | Description                          |
-| ---------------- | ------------------------------------ |
-| Accuracy         | Overall correctness                  |
-| Precision        | Correct positive predictions         |
-| Recall           | Ability to detect suitable employees |
-| F1-score         | Balance between precision & recall   |
-| Confusion Matrix | TP, TN, FP, FN analysis              |
+The system also supports **external unseen dataset evaluation**:
+
+* Uses `datasets/test-dataset/`
+* Completely independent from training data
+* Simulates real-world scenario
+
+👉 If labels exist:
+
+* metrics are calculated
+
+👉 If labels do not exist:
+
+* only prediction is performed
 
 ---
 
 ## 🔮 Prediction Pipeline
 
-After training and evaluation:
-
 * Load trained model
-* Generate features for employee-project pairs
+* Generate features
 * Predict suitability score
-
-Output:
 
 ```
 predicted_score (0 → 1)
@@ -211,53 +199,28 @@ predicted_score (0 → 1)
 
 ## 🧠 Knowledge Graph Recommendation
 
-* Captures relationships between:
+* Uses full dataset
+* Builds relationships:
 
-  * employees
-  * skills
-  * projects
-
-* Helps identify:
-
-  * domain experts
-  * related experience
-  * skill connections
+  * Employee ↔ Skills ↔ Projects
 
 ---
 
 ## 🏆 Recommendation System
 
-### ✅ Final Recommendation (ML)
+### ✅ ML Recommendation
 
-* Ranked employees based on predicted score
-* Top-K selection
+* Top-K based on predicted score
 
----
+### 🔗 Hybrid Recommendation
 
-### 🔗 Hybrid Recommendation (ML + KG)
-
-Combines:
-
-* Machine Learning prediction
-* Knowledge Graph reasoning
-
-Final Output:
-
-```
-Best possible employee recommendations
-```
+* ML + Knowledge Graph combined
 
 ---
 
 ## ▶️ How to Run
 
-### Step 1: Train Model
-
-```bash
-python main.py
-```
-
-Enable:
+### Train Model
 
 ```python
 RUN_GENERATE_TRAIN_MODEL = True
@@ -265,13 +228,7 @@ RUN_GENERATE_TRAIN_MODEL = True
 
 ---
 
-### Step 2: Evaluate Model
-
-```bash
-python main.py
-```
-
-Enable:
+### Evaluate Model (20%)
 
 ```python
 RUN_EVALUATE_MODEL = True
@@ -279,13 +236,7 @@ RUN_EVALUATE_MODEL = True
 
 ---
 
-### Step 3: Run Prediction
-
-```bash
-python main.py
-```
-
-Enable:
+### External Testing
 
 ```python
 RUN_TEST_MODEL = True
@@ -293,15 +244,45 @@ RUN_TEST_MODEL = True
 
 ---
 
-### Step 4: Generate Recommendations
-
-Enable:
+### Recommendation
 
 ```python
 RUN_KG_RECOMMEND = True
 RUN_FINAL_RECOMMENDATION = True
 RUN_HYBRID_RECOMMENDATION = True
 ```
+
+---
+
+## ⚠️ Important Design Principles
+
+### ✔ Separation of Pipeline
+
+| Stage         | Data         |
+| ------------- | ------------ |
+| Training      | 80%          |
+| Internal Test | 20%          |
+| External Test | New dataset  |
+| Prediction    | Model output |
+
+---
+
+### ✔ Modular Execution
+
+Each stage can be turned ON/OFF using flags:
+
+* Avoid retraining
+* Fast demo for viva
+* Efficient pipeline
+
+---
+
+### ✔ Model Validation
+
+Before inference:
+
+* Check if model exists
+* Check if test data exists
 
 ---
 
@@ -315,42 +296,19 @@ RUN_HYBRID_RECOMMENDATION = True
 
 ---
 
-## ⚠️ Important Design Principle
-
-The system strictly separates:
-
-### ✔ Training
-
-* Uses 80% data
-
-### ✔ Testing
-
-* Uses 20% unseen data
-
-### ✔ Recommendation
-
-* Uses trained model after testing
-
-👉 This ensures:
-
-* No data leakage
-* Fair evaluation
-* Real-world applicability
-
----
-
 ## 🧪 Key Contributions
 
-* Hybrid AI system (ML + KG)
-* Feature-based employee matching
-* Scalable recommendation system
-* Explainable AI pipeline
+* Hybrid AI (ML + KG)
+* External testing support
+* Modular pipeline
+* Real-world simulation
+* Explainable system
 
 ---
 
 ## 📚 Academic Summary
 
-> The HAF-EPA framework integrates machine learning and knowledge graph reasoning for employee-project allocation. The system uses a supervised learning approach with a Random Forest classifier trained on 80% of the data and evaluated on 20% unseen data. After evaluation, the model is used for project-specific prediction and combined with knowledge graph outputs to generate hybrid recommendations.
+> The HAF-EPA framework integrates machine learning and knowledge graph reasoning for employee-project allocation. The system uses a supervised learning approach with a Random Forest classifier trained on 80% of the data and evaluated on 20% unseen data. Additionally, an external dataset is used to simulate real-world prediction scenarios. The final output combines ML predictions and knowledge graph reasoning.
 
 ---
 
@@ -364,19 +322,17 @@ ID: 22975954
 ## 🚀 Future Work
 
 * Deep learning integration
-* Real-time API deployment
-* Explainable AI dashboard
-* Dynamic skill updates
+* API deployment
+* Real-time prediction
+* Explainable dashboard
 
 ---
 
 ## ⭐ Final Note
 
-This project demonstrates a **real-world hybrid AI solution** for intelligent employee allocation combining:
+This project demonstrates a **production-ready hybrid AI system** combining:
 
 * Machine Learning
 * Knowledge Graph
-* Rule-based reasoning
-
----
+* Real-world testing
  
