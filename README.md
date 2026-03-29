@@ -61,7 +61,34 @@ HAF-EPA/
 ```
 
 ---
+---
+## 📊 Dataset
 
+This project uses a **synthetic dataset** designed to simulate real-world employee–project allocation scenarios.
+
+The dataset includes:
+
+* Employees
+* Projects
+* Tasks
+* Skills
+* Employee-Skill Mapping
+* Project-Skill Mapping
+
+### 🔗 Data Source
+
+The dataset is publicly available on Kaggle:
+
+👉 https://www.kaggle.com/datasets/firozfau/software-development-employee-project-dataset
+
+### ⚠️ Note
+
+* The dataset is **synthetically generated** for research and experimental purposes.
+* It does not contain real personal or organizational data.
+* It is designed to reflect realistic software development project environments.
+
+
+---
 ## ⚙️ Workflow
 
 ### 1️⃣ Data Loading
