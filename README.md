@@ -328,6 +328,14 @@ This project demonstrates a **production-ready hybrid AI system** combining:
 * Real-world testing
  
 ---
+
+ ## 🚀 Future Work
+
+* Deep learning integration 
+* Real-time prediction
+* Explainable dashboard
+
+---
 ---
 ## 🚀 Ongoing Work / Future Extension
 
@@ -386,11 +394,3 @@ To transform the system into a **fully automated intelligent decision-support pl
 
 ---
 
-
- ## 🚀 Future Work
-
-* Deep learning integration 
-* Real-time prediction
-* Explainable dashboard
-
----
