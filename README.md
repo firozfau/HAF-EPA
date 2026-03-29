@@ -304,18 +304,6 @@ Before inference:
 * Real-world simulation
 * Explainable system
 
----
-
-## 📚 Academic Summary
-
-> The HAF-EPA framework integrates machine learning and knowledge graph reasoning for employee-project allocation. The system uses a supervised learning approach with a Random Forest classifier trained on 80% of the data and evaluated on 20% unseen data. Additionally, an external dataset is used to simulate real-world prediction scenarios. The final output combines ML predictions and knowledge graph reasoning.
-
----
-
-## 👨‍💻 Author
-
-**MD Firozur Rahman**
-ID: 22975954
 
 ---
 
@@ -334,6 +322,18 @@ This project demonstrates a **production-ready hybrid AI system** combining:
 * Deep learning integration 
 * Real-time prediction
 * Explainable dashboard
+
+---
+## 📚 Academic Summary
+
+> The HAF-EPA framework integrates machine learning and knowledge graph reasoning for employee-project allocation. The system uses a supervised learning approach with a Random Forest classifier trained on 80% of the data and evaluated on 20% unseen data. Additionally, an external dataset is used to simulate real-world prediction scenarios. The final output combines ML predictions and knowledge graph reasoning.
+
+---
+
+## 👨‍💻 Author
+
+**MD Firozur Rahman**
+ID: 22975954
 
 ---
 ---
