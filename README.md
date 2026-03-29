@@ -1,4 +1,4 @@
-# 📌 HAF-EPA: Hybrid AI Framework for Employee Project Allocation
+# HAF-EPA: Hybrid AI Framework for Employee Project Allocation
 
 ---
 
@@ -16,7 +16,7 @@ to improve accuracy, efficiency, and fairness in employee allocation.
 
 ---
 
-## 🎯 Objectives
+## Objectives
 
 * Automate employee-to-project assignment
 * Reduce manual bias and inefficiency
@@ -319,15 +319,6 @@ ID: 22975954
 
 ---
 
-## 🚀 Future Work
-
-* Deep learning integration
-* API deployment
-* Real-time prediction
-* Explainable dashboard
-
----
-
 ## ⭐ Final Note
 
 This project demonstrates a **production-ready hybrid AI system** combining:
@@ -336,3 +327,70 @@ This project demonstrates a **production-ready hybrid AI system** combining:
 * Knowledge Graph
 * Real-world testing
  
+---
+---
+## 🚀 Ongoing Work / Future Extension
+
+The HAF-EPA system is being extended into a real-world intelligent web application with the following capabilities:
+
+### 📌 Project-Based Prediction
+
+* Users can upload or define a new project (e.g., PDF, form input).
+* The system extracts project requirements such as:
+
+  * Required skills
+  * Project domain
+  * Complexity level
+* The trained model predicts and ranks the most suitable employees.
+
+---
+
+### 👥 Real-World Employee Allocation
+
+* Uses the full employee dataset
+* Automatically matches employees with project requirements
+* Generates **Top-5 best-fit employees** based on:
+
+  * Skill matching
+  * Experience
+  * Availability
+  * ML prediction score
+
+---
+
+### 🌐 Web Application Integration
+
+* A user-friendly web interface will be developed
+* Features include:
+
+  * Project upload (PDF / form input)
+  * Real-time prediction results
+  * Interactive dashboards
+
+---
+
+### 📊 Visualization & User Interaction
+
+* Visual graphs and analytics for:
+
+  * Employee ranking
+  * Skill matching score
+  * Recommendation explanation
+* Enhances interpretability and decision-making
+
+---
+
+### 🎯 Goal
+
+To transform the system into a **fully automated intelligent decision-support platform** that can be used in real-world HR and project management systems.
+
+---
+
+
+ ## 🚀 Future Work
+
+* Deep learning integration 
+* Real-time prediction
+* Explainable dashboard
+
+---
