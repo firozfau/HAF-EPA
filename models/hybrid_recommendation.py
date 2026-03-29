@@ -1,12 +1,7 @@
+from __future__ import annotations
+
 import pandas as pd
 
-#Hybrid approach for single project use project ID
-# -->ML and Graph each have strengths + weaknesses, and combining them gives better, more reliable recommendations.
-# Generate hybrid employee recommendations for a single project by combining machine learning prediction scores with graph-based matching scores.
-
-# ML says: “This employee usually performs well on similar projects”
-# Graph says: “This employee has the required skills”
-#“This employee both has the skills AND historically performs well”
 
 def hybrid_recommendation(
     predicted_df: pd.DataFrame,
@@ -16,12 +11,14 @@ def hybrid_recommendation(
     ml_weight: float = 0.7,
     graph_weight: float = 0.3,
 ) -> pd.DataFrame:
-    
+    """
+    Hybrid recommendation for one project using OUTER merge.
+    """
 
-    # 1. Filter ML prediction for the target project
     ml_df = predicted_df[predicted_df["project_id"] == project_id].copy()
+    graph_df = graph_rec[graph_rec["project_id"] == project_id].copy()
 
-    if ml_df.empty:
+    if ml_df.empty and graph_df.empty:
         return pd.DataFrame(
             columns=[
                 "employee_id",
@@ -33,51 +30,62 @@ def hybrid_recommendation(
             ]
         )
 
-    # 2. Filter graph recommendation for the target project
-    graph_df = graph_rec[graph_rec["project_id"] == project_id].copy()
+    if not ml_df.empty:
+        ml_keep_cols = [c for c in ["employee_id", "full_name", "project_id", "predicted_score"] if c in ml_df.columns]
+        ml_df = ml_df[ml_keep_cols].copy()
+        if "full_name" not in ml_df.columns:
+            ml_df["full_name"] = None
+    else:
+        ml_df = pd.DataFrame(columns=["employee_id", "full_name", "project_id", "predicted_score"])
 
-    # 3. Normalize graph score to 0-1
     if not graph_df.empty:
         max_score = graph_df["match_score"].max()
         if max_score > 0:
             graph_df["graph_score"] = graph_df["match_score"] / max_score
         else:
             graph_df["graph_score"] = 0.0
-    else:
-        graph_df = pd.DataFrame(columns=["project_id", "employee_id", "graph_score"])
 
-   # 4. Merge ML and KG
-    merged = ml_df.merge(
-        graph_df[["project_id", "employee_id", "graph_score"]],
-        on=["project_id", "employee_id"],
-        how="left",
+        graph_df = graph_df[["employee_id", "employee_name", "project_id", "graph_score"]].copy()
+        graph_df = graph_df.rename(columns={"employee_name": "full_name"})
+    else:
+        graph_df = pd.DataFrame(columns=["employee_id", "full_name", "project_id", "graph_score"])
+
+    merged = pd.merge(
+        ml_df,
+        graph_df,
+        on=["employee_id", "project_id"],
+        how="outer",
+        suffixes=("_ml", "_kg"),
     )
 
-    merged["graph_score"] = pd.to_numeric(
-        merged["graph_score"], errors="coerce"
+    if "full_name_ml" in merged.columns and "full_name_kg" in merged.columns:
+        merged["full_name"] = merged["full_name_ml"].fillna(merged["full_name_kg"])
+        merged = merged.drop(columns=["full_name_ml", "full_name_kg"])
+    elif "full_name_ml" in merged.columns:
+        merged["full_name"] = merged["full_name_ml"]
+        merged = merged.drop(columns=["full_name_ml"])
+    elif "full_name_kg" in merged.columns:
+        merged["full_name"] = merged["full_name_kg"]
+        merged = merged.drop(columns=["full_name_kg"])
+
+    merged["predicted_score"] = pd.to_numeric(
+        merged.get("predicted_score"), errors="coerce"
     ).fillna(0.0)
 
-    # 5. Hybrid score
+    merged["graph_score"] = pd.to_numeric(
+        merged.get("graph_score"), errors="coerce"
+    ).fillna(0.0)
+
     merged["hybrid_score"] = (
-        merged["predicted_score"] * ml_weight +
-        merged["graph_score"] * graph_weight
+        merged["predicted_score"] * ml_weight
+        + merged["graph_score"] * graph_weight
     )
 
-    # 6. Sort and keep top_k
     merged = merged.sort_values(
-        by="hybrid_score",
-        ascending=False
+        by=["hybrid_score", "predicted_score", "graph_score"],
+        ascending=[False, False, False]
     ).reset_index(drop=True)
 
-    output_columns = [
-        "employee_id",
-        "full_name",
-        "project_id",
-        "predicted_score",
-        "graph_score",
-        "hybrid_score",
-    ]
-
-    available_columns = [col for col in output_columns if col in merged.columns]
-
-    return merged[available_columns].head(top_k)
+    return merged[
+        ["employee_id", "full_name", "project_id", "predicted_score", "graph_score", "hybrid_score"]
+    ].head(top_k)

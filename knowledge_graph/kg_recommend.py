@@ -7,13 +7,12 @@ from knowledge_graph.representation import kg_recommendation
 
 from config import (
     KG_RECOMMENDED_LIMIT,
-    LIMIT_NUMBER, 
-    KNOWLEDGE_RECOMMENDED_EXCEL,
+    LIMIT_NUMBER,  
 ) 
+#work flow=> Employee → Skills → Projects → Relationships
 
 def kg_recommend() -> None:
-    print("HAF-EPA Knowledge Graph Recommendation Starting...")
-
+   
     # 1. Load raw datasets
     data = load_datasets()
 
@@ -50,9 +49,5 @@ def kg_recommend() -> None:
 
     group_kgr_data = sorted_kgr_data.groupby("project_id")
     top_emp_kgr_data = group_kgr_data.head(LIMIT_NUMBER)
-
-    top_emp_kgr_data.to_excel(KNOWLEDGE_RECOMMENDED_EXCEL, index=False)
-
-    print(f"\nSuccessfully generate Knowledge Graph recommendation : {KNOWLEDGE_RECOMMENDED_EXCEL}")
 
     return top_emp_kgr_data

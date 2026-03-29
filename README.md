@@ -1,230 +1,382 @@
-# 🚀 HAF-EPA
-
-**Hybrid AI Framework for Employee Project Allocation**
+# 📌 HAF-EPA: Hybrid AI Framework for Employee Project Allocation
 
 ---
 
-## 📌 Overview
+## 📖 Overview
 
-HAF-EPA is a hybrid AI-based system designed to intelligently recommend the most suitable employees for a given project.
+HAF-EPA (Hybrid AI Framework for Employee Project Allocation) is an intelligent system designed to automatically recommend the most suitable employees for a given project.
 
-This system combines:
+The framework integrates:
 
-* 🤖 Machine Learning (Random Forest)
-* 🧠 Knowledge Graph
-* 🔗 Hybrid Recommendation Logic
+* 🤖 **Machine Learning (Random Forest)**
+* 🧠 **Knowledge Graph Reasoning**
+* ⚙️ **Rule-Based Filtering**
 
-It enables:
-
-* Data-driven employee selection
-* Smart project allocation
-* Automated recommendation from PDF input
-* End-to-end prediction via web interface
+to improve accuracy, efficiency, and fairness in employee allocation.
 
 ---
 
-## 🎯 Key Features
+## 🎯 Objectives
 
-* 📊 Employee–Project suitability prediction
-* 🤖 ML-based ranking (Random Forest)
-* 🧠 Knowledge Graph integration
-* 🔗 Hybrid scoring (ML + Graph)
-* 📄 PDF-based project input
-* 🌐 Web application interface
-* 📈 Visualization (Pie Chart + Bar Chart)
+* Automate employee-to-project assignment
+* Reduce manual bias and inefficiency
+* Improve decision accuracy
+* Recommend **Top-K best employees** for each project
+* Support real-world decision-making systems
 
 ---
 
-## 🏗️ Project Structure
+## 🏗️ System Architecture
 
+```text
+Raw Data
+→ Data Preprocessing & Normalization
+→ Employee-Project Pair Creation
+→ Feature Engineering
+→ Label Generation
+→ Train/Test Split (80/20)
+→ Machine Learning Model (Random Forest)
+→ Model Evaluation
+→ Prediction Pipeline
+→ Knowledge Graph Recommendation
+→ Final Recommendation (ML)
+→ Hybrid Recommendation (ML + KG)
 ```
+
+---
+
+## 📂 Project Structure
+
+```text
 HAF-EPA/
 │
 ├── data_loader/
-├── models/
-├── inference/
-├── testing_dataset/
-├── webapp/
-│   ├── templates/
-│   ├── services/
-│   └── app.py
+│   └── load_datasets.py
 │
-├── saved_outputs/
+├── process/
+│   ├── normalize.py
+│   ├── employee_skill_mapping.py
+│   ├── project_skill_mapping.py
+│   ├── mapping.py
+│   ├── pair_creation.py
+│   ├── feature_engineering.py
+│   └── lebel_employee_project.py
+│
+├── models/
+│   ├── train_model.py
+│   ├── generate_train_model.py
+│   ├── evaluate_model.py
+│   ├── test_model.py
+│   ├── predict.py
+│   ├── final_recommendation.py
+│   └── hybrid_recommendation.py
+│
+├── knowledge_graph/
+│   └── kg_recommend.py
+│
+├── output/
+│   ├── HAF-EPA.joblib
+│   ├── held_out_test_data.joblib
+│   ├── knowledge_recommended_data.xlsx
+│   ├── final_recommendations.xlsx
+│   └── hybrid_recommendations.xlsx
+│
+├── config.py
 ├── main.py
-├── requirements.txt
 └── README.md
 ```
 
 ---
 
-## ⚙️ Technologies Used
+## ⚙️ Workflow
 
-* Python 3
-* Pandas, NumPy
-* Scikit-learn
-* Flask
-* Matplotlib
-* Joblib
+### 1️⃣ Data Loading
 
----
+* Load datasets:
 
-## 🧠 Machine Learning Pipeline
-
-1. Dataset Loading
-2. Skill Mapping & Enrichment
-3. Employee–Project Pair Generation
-4. Feature Engineering
-5. Label Generation
-6. Model Training (Random Forest)
-7. Evaluation (Accuracy, Precision, Recall, F1-score)
+  * Employees
+  * Projects
+  * Tasks
+  * Skills
 
 ---
 
-## 🔗 Knowledge Graph
+### 2️⃣ Data Preprocessing
 
-The system builds a knowledge graph with:
-
-**Nodes:**
-
-* Employees
-* Projects
-* Skills
-
-**Edges:**
-
-* HAS_SKILL
-* WORKED_ON
-
-Used for:
-
-* Graph-based recommendations
-* Hybrid scoring enhancement
+* Data cleaning
+* Validation
+* Normalization
+* Skill mapping
 
 ---
 
-## 📄 PDF-Based Inference
+### 3️⃣ Employee-Project Pair Creation
 
-The system supports real-world usage via PDF input.
+Each row represents:
 
-### Workflow:
-
-1. Upload project PDF
-2. Extract:
-
-   * Project title
-   * Type
-   * Required skills
-   * Complexity
-3. Generate employee candidates
-4. Predict suitability using trained model
-5. Rank Top 10 employees
+```
+(Employee + Project)
+```
 
 ---
 
-## 🏆 Output Example
+### 4️⃣ Feature Engineering
 
-* Top 10 recommended employees
-* Predicted score
-* Suggested role (Frontend / Backend / etc.)
+Key features:
+
+* matched skill count
+* skill match score
+* experience score
+* availability score
+* skill coverage
+* primary skill match
+
+---
+
+### 5️⃣ Label Generation
+
+* `1` → Suitable employee
+* `0` → Not suitable
+
+---
+
+## 🤖 Machine Learning Model
+
+### Model Used
+
+* **Random Forest Classifier**
+
+### Why Random Forest?
+
+* Works well with structured/tabular data
+* Handles **non-linear relationships**
+* Reduces overfitting (ensemble learning)
+* Requires minimal preprocessing
+
+---
+
+## 📊 Training & Testing
+
+### Train-Test Split
+
+* **80% Training Data**
+* **20% Unseen Testing Data**
+
+### Training Phase
+
+* Model learns from employee-project features
+* Model saved as:
+
+```
+HAF-EPA.joblib
+```
+
+---
+
+### Testing Phase (Unseen Data)
+
+* Uses **20% unseen data**
+* Ensures fair evaluation
+* Prevents data leakage
+
+---
+
+## 📈 Model Evaluation Metrics
+
+| Metric           | Description                          |
+| ---------------- | ------------------------------------ |
+| Accuracy         | Overall correctness                  |
+| Precision        | Correct positive predictions         |
+| Recall           | Ability to detect suitable employees |
+| F1-score         | Balance between precision & recall   |
+| Confusion Matrix | TP, TN, FP, FN analysis              |
+
+---
+
+## 🔮 Prediction Pipeline
+
+After training and evaluation:
+
+* Load trained model
+* Generate features for employee-project pairs
+* Predict suitability score
+
+Output:
+
+```
+predicted_score (0 → 1)
+```
+
+---
+
+## 🧠 Knowledge Graph Recommendation
+
+* Captures relationships between:
+
+  * employees
+  * skills
+  * projects
+
+* Helps identify:
+
+  * domain experts
+  * related experience
+  * skill connections
+
+---
+
+## 🏆 Recommendation System
+
+### ✅ Final Recommendation (ML)
+
+* Ranked employees based on predicted score
+* Top-K selection
+
+---
+
+### 🔗 Hybrid Recommendation (ML + KG)
+
+Combines:
+
+* Machine Learning prediction
+* Knowledge Graph reasoning
+
+Final Output:
+
+```
+Best possible employee recommendations
+```
 
 ---
 
 ## ▶️ How to Run
 
-### 1️⃣ Train the Model
+### Step 1: Train Model
 
 ```bash
-python3 main.py
+python main.py
 ```
 
-### 2️⃣ Run PDF Recommendation
+Enable:
+
+```python
+RUN_GENERATE_TRAIN_MODEL = True
+```
+
+---
+
+### Step 2: Evaluate Model
 
 ```bash
-python3 inference/recommend_from_pdf.py
+python main.py
+```
+
+Enable:
+
+```python
+RUN_EVALUATE_MODEL = True
 ```
 
 ---
 
-## 🌐 Run Web Application
+### Step 3: Run Prediction
 
 ```bash
-cd webapp
-python3 app.py
+python main.py
 ```
 
-Open in browser:
+Enable:
 
+```python
+RUN_TEST_MODEL = True
 ```
-http://127.0.0.1:5000
+
+---
+
+### Step 4: Generate Recommendations
+
+Enable:
+
+```python
+RUN_KG_RECOMMEND = True
+RUN_FINAL_RECOMMENDATION = True
+RUN_HYBRID_RECOMMENDATION = True
 ```
 
-👉 Upload a PDF → Get ranked employee recommendations instantly.
+---
+
+## 📌 Example Output
+
+| Employee | Score |
+| -------- | ----- |
+| Emp1     | 0.94  |
+| Emp2     | 0.91  |
+| Emp3     | 0.88  |
 
 ---
 
-## 📂 Saved Outputs
+## ⚠️ Important Design Principle
 
-* trained_model.joblib
-* kg_nodes.csv
-* kg_edges.csv
-* top5_*.csv
-* hybrid_recommendations_*.csv
+The system strictly separates:
 
----
+### ✔ Training
 
-## 📅 Project Timeline
+* Uses 80% data
 
-**Duration:** April 2026 – June 2026 (3 Months)
+### ✔ Testing
 
-* Data Layer: Weeks 2–4
-* ML Layer: Weeks 5–8
-* Knowledge Graph: Weeks 9–10
-* Inference: Week 11
-* Web App: Week 12
+* Uses 20% unseen data
 
----
+### ✔ Recommendation
 
-## 🎓 Academic Context
+* Uses trained model after testing
 
-This project is developed as part of a Master's Thesis at
-**Friedrich-Alexander-Universität Erlangen-Nürnberg (FAU)**.
+👉 This ensures:
 
-**Thesis Title:**
-*A Knowledge-Driven Framework for Intelligent Employee Project Allocation*
+* No data leakage
+* Fair evaluation
+* Real-world applicability
 
 ---
 
-## 👤 Author
+## 🧪 Key Contributions
 
-**MD FIROZUR RAHMAN**
-MSc in Data Science
-Friedrich-Alexander-Universität Erlangen-Nürnberg
-
----
-
-## 🤝 Acknowledgment
-
-* Prof. Frauke Liers 
-Head of the Data Science Department
-Friedrich-Alexander-Universität Erlangen-Nürnberg
-
-* Robert Bauer
-Managing Director
-TW Legal Tech Rechtsanwaltsgesellschaft mbH
+* Hybrid AI system (ML + KG)
+* Feature-based employee matching
+* Scalable recommendation system
+* Explainable AI pipeline
 
 ---
 
-## 📜 License
+## 📚 Academic Summary
 
-This project is intended for academic and research purposes.
+> The HAF-EPA framework integrates machine learning and knowledge graph reasoning for employee-project allocation. The system uses a supervised learning approach with a Random Forest classifier trained on 80% of the data and evaluated on 20% unseen data. After evaluation, the model is used for project-specific prediction and combined with knowledge graph outputs to generate hybrid recommendations.
+
+---
+
+## 👨‍💻 Author
+
+**MD Firozur Rahman**
+ID: 22975954
 
 ---
 
-## ⭐ Future Improvements
+## 🚀 Future Work
 
-* Deep Learning model integration
-* Real-time employee availability tracking
-* REST API deployment
-* Cloud-based system (AWS/GCP)
+* Deep learning integration
+* Real-time API deployment
+* Explainable AI dashboard
+* Dynamic skill updates
 
 ---
+
+## ⭐ Final Note
+
+This project demonstrates a **real-world hybrid AI solution** for intelligent employee allocation combining:
+
+* Machine Learning
+* Knowledge Graph
+* Rule-based reasoning
+
+---
+ 
