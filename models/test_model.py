@@ -25,6 +25,29 @@ from models.predict import predict_result
 
 from config import TRAINED_MODEL, TEST_DATASET_DIR, TRAINING_THRESHOLD
 
+# This file is used to test the trained model on external unseen test dataset.
+
+# 1. First, it loads external test dataset files from test-dataset folder.
+# 2. Then it normalizes the datasets to make data clean and consistent.
+# 3. After that, it builds employee skill mapping and project skill mapping.
+# 4. It enriches employees and projects with their skill lists.
+
+# 5. Then it selects one target project by project_id.
+# 6. If candidate employee ids are given, it filters only those employees.
+# 7. After that, it creates employee-project pairs for that single project.
+
+# 8. Then feature engineering is applied to create useful matching features.
+# 9. It also adds labels if task data is available.
+
+# 10. Next, it loads the already trained model.
+# 11. The model predicts suitability score for each employee-project pair.
+
+# 12. If label exists in the test data, it evaluates prediction performance
+#     using accuracy, precision, recall, f1-score, confusion matrix,
+#     and classification report.
+
+# Finally, it returns prediction results and evaluation metrics
+# in a structured format (ExternalTestArtifacts).
 
 @dataclass
 class ExternalTestArtifacts:
@@ -42,10 +65,8 @@ class ExternalTestArtifacts:
 def load_test_datasets(
     test_dataset_dir: str | Path = TEST_DATASET_DIR
 ) -> SimpleNamespace:
-    """
-    Load external test datasets from datasets/test-dataset directory
-    and return an attribute-style object compatible with normalize_datasets().
-    """
+
+#Load external test datasets from datasets/test-dataset directory and return an attribute-style object compatible with normalize_datasets().    
     test_dataset_dir = Path(test_dataset_dir)
 
     required_files = {
@@ -129,10 +150,8 @@ def test_model(
     test_dataset_dir: str | Path = TEST_DATASET_DIR,
     threshold: float = TRAINING_THRESHOLD,
 ) -> ExternalTestArtifacts:
-    """
-    Run prediction and optional external evaluation on unseen external test data.
-    """
 
+#Run prediction and optional external evaluation on unseen external test data.
     # 1. Load external unseen test dataset
     data = load_test_datasets(test_dataset_dir)
 
@@ -224,16 +243,8 @@ def test_model(
             cm_list = cm.tolist()
             report = classification_report(y_true, y_pred, zero_division=0)
 
-            print("\n External Test Evaluation Metrics:")
-            print(f"Accuracy : {accuracy:.4f}")
-            print(f"Precision: {precision:.4f}")
-            print(f"Recall   : {recall:.4f}")
-            print(f"F1-score : {f1:.4f}")
-            print(f"Threshold: {threshold:.2f}")
-            print("\nConfusion Matrix:")
-            print(cm)
-            print("\nClassification Report:")
-            print(report)
+            print("\n    Classification Report:")
+            print("        ",report)
         else:
             print("\nLabel column exists but contains no valid values. Metrics cannot be computed.")
     else:

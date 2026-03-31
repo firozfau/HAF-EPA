@@ -3,6 +3,11 @@ from __future__ import annotations
 import pandas as pd
 
 
+# Feature engineering is an important part of machine learning for employee-project suitability.
+# It converts raw employee-project pair data into meaningful features like:
+# skill match score, skill counts, and normalized experience and availability,
+# so the model can learn better and improve matching accuracy.
+
 def _safe_list(value):
     if isinstance(value, list):
         return value
@@ -10,10 +15,7 @@ def _safe_list(value):
 
 
 def add_features(pairs_df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Add stronger ML features for employee-project suitability.
-    """
-
+   
     featured_df = pairs_df.copy()
 
     # make sure skill columns are lists

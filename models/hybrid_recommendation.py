@@ -2,6 +2,25 @@ from __future__ import annotations
 
 import pandas as pd
 
+# This function is used to combine ML prediction and Knowledge Graph recommendation.
+
+# 1. It takes ML predicted results and graph-based results for a single project.
+# 2. If both are empty, it returns an empty result.
+
+# 3. From ML data, it keeps employee_id, name, project_id and predicted_score.
+# 4. From graph data, it normalizes match_score into graph_score.
+
+# 5. Then it merges both ML and graph data using outer join,
+#    so all employees from both sources are included.
+
+# 6. It handles missing values and ensures scores are numeric.
+
+# 7. It calculates hybrid_score using:
+#    hybrid_score = (ml_score * ml_weight) + (graph_score * graph_weight)
+
+# 8. Then it sorts by hybrid_score (highest first).
+
+# 9. Finally, it returns top K employees as final recommendation.
 
 def hybrid_recommendation(
     predicted_df: pd.DataFrame,
@@ -11,9 +30,7 @@ def hybrid_recommendation(
     ml_weight: float = 0.7,
     graph_weight: float = 0.3,
 ) -> pd.DataFrame:
-    """
-    Hybrid recommendation for one project using OUTER merge.
-    """
+  
 
     ml_df = predicted_df[predicted_df["project_id"] == project_id].copy()
     graph_df = graph_rec[graph_rec["project_id"] == project_id].copy()

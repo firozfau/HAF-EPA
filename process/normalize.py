@@ -1,6 +1,31 @@
 import pandas as pd
 
 
+# normalize_datasets is basically used to clean and prepare all raw datasets
+# before using them in mapping, feature engineering, training, or recommendation.
+
+# 1. First, it checks whether all required columns are available in each dataset.
+#    If any important column is missing, it raises an error.
+
+# 2. Then it converts all ID columns into string format,
+#    so all IDs stay consistent for matching and merging.
+
+# 3. After that, it cleans text columns by removing extra spaces.
+
+# 4. It removes rows where important ID fields are blank, empty, or invalid.
+
+# 5. Then it removes duplicate rows from each dataset
+#    to avoid repeated or incorrect data.
+
+# 6. It keeps only valid skill links,
+#    meaning employee_skills and project_skills must match valid skill_id from skills table.
+
+# 7. It also keeps only valid task, employee, and project links,
+#    so no broken relationship stays in the data.
+
+# Finally, it returns all cleaned and normalized datasets
+# in a structured format for next processing steps.
+
 REQUIRED_COLUMNS = {
     "employees": ["employee_id"],
     "projects": ["project_id","project_name"],
@@ -40,10 +65,6 @@ def _drop_blank_ids(df: pd.DataFrame, key_columns: list[str]) -> pd.DataFrame:
 
 
 def normalize_datasets(data):
-    """
-    Normalize and clean all loaded datasets before knowledge graph or ML usage.
-    Works with LoadedData object.
-    """
 
     employees = data.employees.copy()
     projects = data.projects.copy()

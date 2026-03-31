@@ -16,6 +16,28 @@ from sklearn.metrics import (
 from models.process import load_model
 from config import TRAINED_MODEL, HELD_OUT_TEST_DATA
 
+# This file is used to evaluate the trained machine learning model.
+
+# It loads the trained model and test dataset (held-out data),
+# which was not used during training.
+
+# The model predicts probability for each employee-project pair,
+# then uses a threshold to convert probability into final prediction (0 or 1).
+
+# After prediction, it calculates performance metrics to check how well the model is working.
+
+# These metrics include:
+#   accuracy  → overall correct predictions
+#   precision → correct "suitable" predictions
+#   recall    → how many actual suitable cases are detected
+#   f1-score  → balance between precision and recall
+
+# It also creates:
+#   confusion_matrix → shows TP, TN, FP, FN
+#   classification_report → detailed summary of model performance
+
+# Finally, it returns all evaluation results in a structured format (EvaluationArtifacts),
+# so we can analyze model performance easily.
 
 @dataclass
 class EvaluationArtifacts:

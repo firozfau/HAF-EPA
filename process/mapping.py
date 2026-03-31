@@ -1,6 +1,10 @@
 from __future__ import annotations
 import pandas as pd
 
+# employee_map and project_map are used to link skills with employees and projects.
+# They combine basic data with skill mappings to show results like:
+# Employee 1 → [Python, SQL] or Project 1 → [React, Node],
+# and ensure every entry has a skill list, even if it is empty.
 
 def employee_map(employees: pd.DataFrame, employee_skill_map: pd.DataFrame ) -> pd.DataFrame:
 

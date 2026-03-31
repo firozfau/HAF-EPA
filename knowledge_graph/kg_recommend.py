@@ -5,11 +5,26 @@ from process.normalize import normalize_datasets
 from knowledge_graph.build import kg_build
 from knowledge_graph.representation import kg_recommendation
 
-from config import (
-    KG_RECOMMENDED_LIMIT,
-    LIMIT_NUMBER,  
-) 
-#work flow=> Employee → Skills → Projects → Relationships
+from config import (KG_RECOMMENDED_LIMIT,LIMIT_NUMBER,  ) 
+
+# This file is used to recommend best-fit employees using Knowledge Graph (KG).
+
+# Workflow:
+# Employee → Skills → Projects → Relationships
+
+# 1. Load raw datasets (employees, projects, skills, etc.)
+# 2. Normalize datasets to make data clean and consistent
+# 3. Build knowledge graph (nodes and edges) to represent relationships
+#    between employees, skills, projects, and tasks
+
+# 4. Use KG recommendation logic to calculate match score
+#    between employees and projects
+
+# 5. Sort results by project and match score (highest first)
+
+# 6. Group by project and select top employees for each project
+
+# Finally, return top recommended employees for each project
 
 def kg_recommend() -> None:
    

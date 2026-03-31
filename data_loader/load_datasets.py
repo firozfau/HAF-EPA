@@ -4,6 +4,16 @@ import pandas as pd
 
 from config import (DATASET_1_DIR,DATASET_2_DIR)
 
+# load_datasets is used to load data from multiple dataset sources.
+
+# 1. It loads dataset 1 and dataset 2 CSV files (employees, projects, tasks, employee_skills).
+# 2. Then it combines (concat) both datasets to create a single full dataset.
+
+# 3. project_skills and skills are taken from dataset 1.
+
+# Finally, it returns all datasets in a structured format (LoadedData)
+# so they can be used in further processing steps.
+
 
 @dataclass
 class LoadedData:

@@ -1,6 +1,22 @@
 import pandas as pd
 from typing import Tuple
 
+# kg_build is used to create a knowledge graph from dataset.
+
+# 1. It creates nodes for:
+#    Employee → employee_id, name
+#    Project  → project_id, name
+#    Skill    → skill_id, name
+
+# 2. It creates edges (relationships) between nodes:
+#    Employee → Skill   (HAS_SKILL)
+#    Project  → Skill   (REQUIRES_SKILL)
+#    Employee → Project (WORKED_ON)
+
+# 3. It removes duplicate nodes and edges.
+
+# Finally, it returns nodes and edges dataframe,
+# which represent the full knowledge graph structure.
 
 def kg_build(
     employees: pd.DataFrame,
@@ -10,9 +26,8 @@ def kg_build(
     project_skills: pd.DataFrame,
     skills: pd.DataFrame,
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
-    """
-    Build knowledge graph nodes and edges from normalized datasets.
-    """
+    
+    #Build knowledge graph nodes and edges from normalized datasets.
 
     nodes = []
     edges = []

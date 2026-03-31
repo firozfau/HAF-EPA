@@ -3,16 +3,16 @@ from __future__ import annotations
 import pandas as pd
 
 
+# Project_skill_mapping is basically used to match each project with its skills.
+# It maps project skills into a grouped list format like:
+# Project 1 → [Python, SQL, React] instead of multiple rows or skill IDs.
+# It uses mapped skills first, and if not available, it extracts skills from technology_stack.
+
 def extract_skills_from_stack(
     stack_text: object,
     valid_skill_names: set[str],
 ) -> list[str]:
-    """
-    Extract skill names from a semicolon-separated technology stack string.
 
-    Example:
-    "Python; SQL; React" -> ["Python", "SQL", "React"]
-    """
     if pd.isna(stack_text):
         return []
 

@@ -17,6 +17,56 @@ from sklearn.model_selection import train_test_split
 from config import RANDOM_STATE, TEST_SIZE, TRAINING_THRESHOLD
 
 
+# Our goal is to train this HAF-EPA model so it can provide the best-fit employee list for a project.
+
+# Based on the dataset, we create a model. After training, it learns how to determine
+# the best-fit employee for upcoming projects.
+
+# In this case, we use Supervised Learning.
+
+# We extract features and create employee-project pairs,
+# where each pair is labeled as suitable or not suitable during training.
+
+# Finally, we apply performance metrics to evaluate how well the model is learning,
+# such as accuracy, precision, recall, and F1-score.
+
+
+# In this training, I chose to use the Random Forest model because:
+#   1. It works well with structured/tabular data.
+#   2. It can handle non-linear relationships (e.g., skill + experience combination).
+#   3. It uses multiple trees, which helps reduce overfitting.
+
+
+# Here:
+#    0. Define which features are used in the model.
+#    1. Handle data imbalance using sampling.
+#    2. Split dataset into training (80%) and testing (20%).
+#    3. Train the Random Forest model.
+#    4. Use a probability threshold to get final class predictions.
+#    5. Evaluate performance using metrics.
+
+
+
+# For Machine Learning Model we use:
+#    1. sklearn = scikit-learn machine learning library
+#    2. ensemble = module for combining multiple models
+#    3. RandomForestClassifier = classification model
+
+
+# Model evaluation: training alone is not enough, we must measure performance
+#    accuracy_score ==> How many predictions were correct overall.
+#    precision_score ==> Out of predicted "suitable", how many are actually suitable.
+#    recall_score ==> Out of actual suitable, how many were correctly predicted.
+#    f1_score ==> Balance between precision and recall.
+#    confusion_matrix ==> Shows TP, TN, FP, FN values.
+#    classification_report ==> Summary of precision, recall, F1-score for each class.
+
+
+# Note:
+# ==> If divide-by-zero happens during precision/recall calculation,
+#     zero_division=0 returns 0 instead of error.
+
+
 FEATURE_COLUMNS = [
     "matched_skill_count",
     "employee_skill_count",
@@ -29,7 +79,6 @@ FEATURE_COLUMNS = [
     "availability_score",
     "primary_skill_match",
 ]
-
 
 @dataclass
 class TrainingArtifacts:

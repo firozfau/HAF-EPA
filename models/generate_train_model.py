@@ -13,18 +13,39 @@ from process.lebel_employee_project import add_labels
 from models.train_model import train_random_forest_model
 from models.process import save_model
 
-from config import (
-    TRAINED_MODEL,
-    HELD_OUT_TEST_DATA,
-)
+from config import (TRAINED_MODEL,HELD_OUT_TEST_DATA,)
 
+# This function is used to generate and train the machine learning model.
+
+# 1. First, it loads all raw datasets.
+# 2. Then it normalizes and cleans the datasets.
+
+# 3. It builds employee and project skill mappings.
+# 4. It enriches employees and projects with their skill lists.
+
+# 5. It keeps only projects that have at least one skill.
+
+# 6. Then it creates employee-project pairs using full dataset.
+
+# 7. Feature engineering is applied to create useful matching features.
+
+# 8. Labels are generated using historical task data (suitable or not).
+
+# 9. The model is trained using 80% data and 20% is kept for testing.
+
+# 10. The trained model is saved for future use.
+
+# 11. The 20% test data (held-out data) is also saved for evaluation.
+
+# Finally, it prints dataset size and confirms model generation.
 
 def generate_train_model():
-    # 1. Load full dataset
+    
     data = load_datasets()
 
-    # 2. Normalize
+    # Normalize and clean all loaded datasets
     normalized_data = normalize_datasets(data)
+
     employees = normalized_data["employees"]
     projects = normalized_data["projects"]
     tasks = normalized_data["tasks"]
@@ -73,10 +94,11 @@ def generate_train_model():
         HELD_OUT_TEST_DATA,
     )
 
-    print(f"\nSuccessfully generated training model: {TRAINED_MODEL}")
-    print(f"Successfully saved held-out internal test data: {HELD_OUT_TEST_DATA}")
-    print(f"Full labeled dataset size: {len(labeled_df)}")
-    print(f"Training size (80%): {len(trained.X_train)}")
-    print(f"Internal test size (20%): {len(trained.X_test)}\n")
+    print(f"Full dataset size : {len(labeled_df)}")
+    print(f"Successfully generated training model: HAF-EPA.joblib and this model uses 80% data of the full dataset.")
+    print(f"Successfully generated training model: HAF-EPA-TEST.joblib and this model uses 20% data of the full dataset.")
+    
+  
+
 
     return trained

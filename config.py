@@ -18,6 +18,6 @@ FINAL_RECOMMENDED_EXCEL = OUTPUT_DIR / "final_recommendations.xlsx"
 HYBRID_RECOMMENDED_EXCEL = OUTPUT_DIR / "hybrid_recommendations.xlsx"
 
 TRAINED_MODEL = OUTPUT_DIR / "HAF-EPA.joblib"
-HELD_OUT_TEST_DATA = OUTPUT_DIR / "held_out_test_data.joblib"
+HELD_OUT_TEST_DATA = OUTPUT_DIR / "HAF-EPA-TEST.joblib"
 
 TRAINING_THRESHOLD = 0.35

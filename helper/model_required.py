@@ -4,6 +4,14 @@ from pathlib import Path
 
 from config import TRAINED_MODEL, HELD_OUT_TEST_DATA
 
+# is_traing_model_available is used to check whether trained model
+# and optional test data file are available or not.
+
+# 1. It checks if trained model file exists.
+# 2. If required, it also checks if held-out test data exists.
+
+# If required files are missing, it returns False,
+# otherwise it returns True.
 
 def is_traing_model_available(
     require_model: bool = True,

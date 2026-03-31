@@ -2,9 +2,14 @@ from __future__ import annotations
 
 import pandas as pd
 
-# This model determine , For this project, how suitable is each employee?
-# We use FEATURE_COLUMNS, which represent the number of attributes that help determine a suitable employee.
-# we can say, it is the actual input variables (features) used by the model.
+# This function is used to determine how suitable each employee is for a project.
+# It uses FEATURE_COLUMNS, which are the important input features for the model.
+
+# These features include skill matching, counts, experience, and availability,
+# which help the model calculate suitability.
+
+# The model predicts a probability score (predicted_score),
+# which shows how likely an employee is suitable for a project.
 
 FEATURE_COLUMNS = [
     "matched_skill_count",

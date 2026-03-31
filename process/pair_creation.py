@@ -2,6 +2,9 @@ from __future__ import annotations
 
 import pandas as pd
 
+# Basically in pair_creation,
+# this method builds a dataframe using full employee and project data,
+# and creates all possible employee-project combinations for further processing and matching.
 
 def build_pairs_employee_project(employees_sample: pd.DataFrame,projects_sample: pd.DataFrame) -> pd.DataFrame:
 

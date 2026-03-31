@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import pandas as pd
 
-#We generate labels using historical task assignments.
-#  If an employee has worked on a project before, we assign label 1, otherwise 0. 
-# This allows the model to learn real-world matching patterns.
+# add_labels is used to generate labels based on historical task data.
+# If an employee has worked on a project before, label = 1 (suitable),
+# otherwise label = 0 (not suitable).
+# This helps the model learn real-world employee-project matching patterns.
 
 def add_labels(features_df: pd.DataFrame, tasks_df: pd.DataFrame) -> pd.DataFrame:
     labeled_df = features_df.copy()

@@ -20,7 +20,7 @@ from config import (
 
 # 1. Training switch
 # Turn ON only when you want to retrain the model.
-RUN_GENERATE_TRAIN_MODEL = True
+RUN_GENERATE_TRAIN_MODEL = False
 
 # 2. Internal held-out evaluation (20% test split)
 RUN_EVALUATE_MODEL = True
@@ -48,7 +48,7 @@ total_number_hybrid = 10
 
 
 def main() -> None:
-    print("\nHAF-EPA Main Controller Starting...\n")
+    print("\n Welcome to HAF-EPA \n")
 
     graph_rec = None
     predicted_DataFrame = None
@@ -61,15 +61,10 @@ def main() -> None:
     if RUN_GENERATE_TRAIN_MODEL:
         print("1) Training stage started...")
         trained = generate_train_model()
-
-        print("   => Training completed successfully")
-        print("   => Train size:", len(trained.X_train))
-        print("   => Held-out internal test size:", len(trained.X_test))
-        print("   => Training threshold:", trained.threshold)
-
+        print("=> Training completed successfully")
 
     if not is_traing_model_available():
-        print(" ==> No trained model found. Please train the model before proceeding.")
+        print(" ==> No trained model was found; it must be trained and generated.")
     else:
 
         # =====================================================
@@ -79,15 +74,13 @@ def main() -> None:
             print("\n2) Internal evaluation stage started...")
             evaluate_metrics = evaluate_model()
 
+            print("       Model Accuracy :", evaluate_metrics.accuracy)
+            print("       Precision      :", evaluate_metrics.precision)
+            print("       Recall         :", evaluate_metrics.recall)
+            print("       F1-score       :", evaluate_metrics.f1)
+            print("       Threshold      :", evaluate_metrics.threshold)
+            print("       Confusion Matrix:", evaluate_metrics.confusion_matrix)
             print("   => Internal evaluation completed successfully")
-            print("   => Model Accuracy :", evaluate_metrics.accuracy)
-            print("   => Precision      :", evaluate_metrics.precision)
-            print("   => Recall         :", evaluate_metrics.recall)
-            print("   => F1-score       :", evaluate_metrics.f1)
-            print("   => Threshold      :", evaluate_metrics.threshold)
-            print("   => Confusion Matrix:", evaluate_metrics.confusion_matrix)
-            print("\n   => Classification Report:")
-            print(evaluate_metrics.classification_report)
         else:
             print("\n2) Internal evaluation stage skipped.")
 
@@ -100,8 +93,8 @@ def main() -> None:
 
             if graph_rec is not None and not graph_rec.empty:
                 graph_rec.to_excel(KNOWLEDGE_RECOMMENDED_EXCEL, index=False)
-                print("   => Knowledge Graph recommendation completed successfully")
                 print(f"   => Saved: {KNOWLEDGE_RECOMMENDED_EXCEL}")
+                print("   => Knowledge Graph recommendation completed successfully")
             else:
                 print("   => KG recommendation returned empty data.")
         else:
@@ -113,29 +106,21 @@ def main() -> None:
         if RUN_TEST_MODEL:
             print("\n4) External test + project prediction stage started...")
 
-            # IMPORTANT:
-            # Use full external employee pool during testing.
-            # Do NOT filter by KG shortlist here if you want fair testing.
-            test_result = test_model(
-                project_id=selected_project_id,
-                candidate_employee_ids=None,
-            )
+            # IMPORTANT: Use full external employee pool during testing.
+            test_result = test_model(project_id=selected_project_id, candidate_employee_ids=None,)
 
             predicted_DataFrame = test_result.predicted_df
-
-            print("   => External test + prediction completed successfully")
-            print("   => Total predicted rows:", test_result.total_rows)
+            print("Total predicted rows:", test_result.total_rows)
 
             if test_result.accuracy is not None:
-                print("\n   => External test metrics:")
+                print("\nExternal test metrics:")
                 print("      Accuracy :", test_result.accuracy)
                 print("      Precision:", test_result.precision)
                 print("      Recall   :", test_result.recall)
                 print("      F1-score :", test_result.f1)
                 print("      Threshold:", test_result.threshold)
-                print("      Confusion Matrix:", test_result.confusion_matrix)
-                print("\n   => External Classification Report:")
-                print(test_result.classification_report)
+                print("      Confusion Matrix:", test_result.confusion_matrix)  
+                print("=> External test + prediction completed successfully")
             else:
                 print("   => External metrics could not be computed because labels were unavailable.")
         else:
@@ -150,19 +135,14 @@ def main() -> None:
             if predicted_DataFrame is None or predicted_DataFrame.empty:
                 print("   => Final recommendation skipped because prediction data is empty.")
             else:
-                final_rec = generate_final_recommendation(
-                    predicted_DataFrame[
-                        predicted_DataFrame["project_id"] == selected_project_id
-                    ],
-                    top_k=top_k,
-                )
+                final_rec = generate_final_recommendation( predicted_DataFrame[ predicted_DataFrame["project_id"] == selected_project_id ], top_k=top_k,  )
 
                 if final_rec is None or final_rec.empty:
                     print("   => Final recommendation is empty. No file saved.")
                 else:
                     final_rec.to_excel(FINAL_RECOMMENDED_EXCEL, index=False)
-                    print("   => Final recommendation generated successfully")
-                    print(f"   => Saved: {FINAL_RECOMMENDED_EXCEL}")
+                    print(f"   Saved: {FINAL_RECOMMENDED_EXCEL}")
+                    print("=> Final recommendation generated successfully")
         else:
             print("\n5) Final recommendation stage skipped.")
 
@@ -177,23 +157,18 @@ def main() -> None:
             elif graph_rec is None or graph_rec.empty:
                 print("   => Hybrid recommendation skipped because KG recommendation data is missing.")
             else:
-                hybrid_rec = hybrid_recommendation(
-                    predicted_df=predicted_DataFrame,
-                    graph_rec=graph_rec,
-                    project_id=selected_project_id,
-                    top_k=total_number_hybrid,
-                )
+                hybrid_rec = hybrid_recommendation(predicted_df=predicted_DataFrame, graph_rec=graph_rec, project_id=selected_project_id, top_k=total_number_hybrid,)
 
                 if hybrid_rec is None or hybrid_rec.empty:
                     print("   => Hybrid recommendation is empty. No file saved.")
                 else:
                     hybrid_rec.to_excel(HYBRID_RECOMMENDED_EXCEL, index=False)
-                    print("   => Hybrid recommendation generated successfully")
-                    print(f"   => Saved: {HYBRID_RECOMMENDED_EXCEL}")
+                    print(f"   Saved: {HYBRID_RECOMMENDED_EXCEL}")
+                    print("=> Hybrid recommendation generated successfully")
         else:
             print("\n6) Hybrid recommendation stage skipped.")
 
-        print("\nHAF-EPA Main Controller Finished.\n")
+        print("\n HAF-EPA has been successfully completed. \n")
 
 
 if __name__ == "__main__":
