@@ -8,9 +8,9 @@ HAF-EPA (Hybrid AI Framework for Employee Project Allocation) is an intelligent 
 
 The framework integrates:
 
-* 🤖 **Machine Learning (Random Forest)**
-* 🧠 **Knowledge Graph Reasoning**
-* ⚙️ **Rule-Based Filtering**
+*-**Machine Learning (Random Forest)**
+*-**Knowledge Graph Reasoning**
+*-**Rule-Based Filtering**
 
 to improve accuracy, efficiency, and fairness in employee allocation.
 
@@ -224,7 +224,7 @@ predicted_score (0 → 1)
 
 ---
 
-## 🧠 Knowledge Graph Recommendation
+## Knowledge Graph Recommendation
 
 * Uses full dataset
 * Builds relationships:
