@@ -154,7 +154,7 @@ Each row represents:
 
 ## 📊 Training & Testing
 
-### 🔹 Train-Test Split Implementation
+###  Train-Test Split Implementation
 
 ```python
 X_train, X_test, y_train, y_test = train_test_split(
@@ -171,7 +171,7 @@ X_train, X_test, y_train, y_test = train_test_split(
 
 ---
 
-### 🔹 Training Phase
+### Training Phase
 
 * Model learns from full dataset
 * Saved as:
@@ -182,7 +182,7 @@ HAF-EPA.joblib
 
 ---
 
-### 🔹 Internal Testing (Held-out 20%)
+### Internal Testing (Held-out 20%)
 
 * Uses unseen test data
 * Metrics:
@@ -194,7 +194,7 @@ HAF-EPA.joblib
 
 ---
 
-## 🌍 External Testing (NEW)
+## External Testing 
 
 The system also supports **external unseen dataset evaluation**:
 
@@ -212,7 +212,7 @@ The system also supports **external unseen dataset evaluation**:
 
 ---
 
-## 🔮 Prediction Pipeline
+## Prediction Pipeline
 
 * Load trained model
 * Generate features
@@ -235,7 +235,7 @@ predicted_score (0 → 1)
 
 ## 🏆 Recommendation System
 
-### ✅ ML Recommendation
+### ML Recommendation
 
 * Top-K based on predicted score
 
@@ -313,7 +313,7 @@ Before inference:
 
 ---
 
-## 📌 Example Output
+## Example Output
 
 | Employee | Score |
 | -------- | ----- |
@@ -323,7 +323,7 @@ Before inference:
 
 ---
 
-## 🧪 Key Contributions
+## Key Contributions
 
 * Hybrid AI (ML + KG)
 * External testing support
