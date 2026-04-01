@@ -7,11 +7,9 @@ from knowledge_graph.kg_recommend import kg_recommend
 from models.final_recommendation import generate_final_recommendation
 from models.hybrid_recommendation import hybrid_recommendation
 from helper.model_required import is_traing_model_available
-from config import (
-    FINAL_RECOMMENDED_EXCEL,
-    HYBRID_RECOMMENDED_EXCEL,
-    KNOWLEDGE_RECOMMENDED_EXCEL,
-)
+from process.employee_reference import create_employee_reference
+
+from config import (FINAL_RECOMMENDED_EXCEL,HYBRID_RECOMMENDED_EXCEL,KNOWLEDGE_RECOMMENDED_EXCEL,)
 
 
 # =========================================================
@@ -43,8 +41,8 @@ RUN_HYBRID_RECOMMENDATION = True
 # =========================================================
 
 selected_project_id = "P00024"
-top_k = 10
-total_number_hybrid = 10
+top_k = 500
+total_number_hybrid = 500
 
 
 def main() -> None:
@@ -136,12 +134,13 @@ def main() -> None:
                 print("   => Final recommendation skipped because prediction data is empty.")
             else:
                 final_rec = generate_final_recommendation( predicted_DataFrame[ predicted_DataFrame["project_id"] == selected_project_id ], top_k=top_k,  )
-
+                
                 if final_rec is None or final_rec.empty:
                     print("   => Final recommendation is empty. No file saved.")
                 else:
                     final_rec.to_excel(FINAL_RECOMMENDED_EXCEL, index=False)
                     print(f"   Saved: {FINAL_RECOMMENDED_EXCEL}")
+                    create_employee_reference(final_rec);
                     print("=> Final recommendation generated successfully")
         else:
             print("\n5) Final recommendation stage skipped.")

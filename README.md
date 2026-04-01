@@ -343,53 +343,47 @@ This project demonstrates a **production-ready hybrid AI system** combining:
 * Real-world testing
  
 ---
-
- ## Future Work
-
-* Deep learning integration 
-* Real-time prediction
-* Explainable dashboard
-
----
-## 📚 Academic Summary
-
-> The HAF-EPA framework integrates machine learning and knowledge graph reasoning for employee-project allocation. The system uses a supervised learning approach with a Random Forest classifier trained on 80% of the data and evaluated on 20% unseen data. Additionally, an external dataset is used to simulate real-world prediction scenarios. The final output combines ML predictions and knowledge graph reasoning.
-
----
-
-## 👨‍💻 Author
-
-**MD Firozur Rahman**
-ID: 22975954
-
----
----
-## 🚀 Ongoing Work / Future Extension
-
-The HAF-EPA system is being extended into a real-world intelligent web application with the following capabilities:
-
-### 📌 Project-Based Prediction
-
-* Users can upload or define a new project (e.g., PDF, form input).
-* The system extracts project requirements such as:
-
-  * Required skills
-  * Project domain
-  * Complexity level
-* The trained model predicts and ranks the most suitable employees.
-
 ---
 
 ### 👥 Real-World Employee Allocation
 
 * Uses the full employee dataset
 * Automatically matches employees with project requirements
-* Generates **Top-5 best-fit employees** based on:
+* Generates **Top best-fit employees** based on:
 
   * Skill matching
   * Experience
   * Availability
   * ML prediction score
+
+---
+---
+### WebApp Project Structure (HAF-EPA)
+---
+HAF-EPA/
+│
+├── webapp/
+│   ├── src/
+│   │   ├── *.py
+│   │
+│   ├── templates
+│   │   ├── index.html
+│   │   └── graph.html
+│   │
+│   ├── static/
+│   │   ├── css/
+│   │   ├── js/
+│   │
+│   ├── uploads/
+│   │
+│   ├── app.py
+│   │
+│   └── requirements.txt
+│
+├── output/
+    ├── HAF-EPA.joblib
+    └── employee_reference.csv
+
 
 ---
 
@@ -414,10 +408,101 @@ The HAF-EPA system is being extended into a real-world intelligent web applicati
 * Enhances interpretability and decision-making
 
 ---
+## Current Web Application Workflow
 
-### 🎯 Goal
+Upload Project PDF
+→ Extract PDF Text
+→ Validate Project PDF Structure
+→ Extract Required Skills
+→ Load Employee Dataset
+→ Build Employee Matching Features
+→ Load Trained HAF-EPA Model
+→ Predict Employee Suitability Score
+→ Filter Invalid Matches
+→ Rank Top Employees
+→ Show Results in Web UI
+→ Visualize Results with Charts
 
-To transform the system into a **fully automated intelligent decision-support platform** that can be used in real-world HR and project management systems.
+---
+## 📊 Available Graph Visualizations
+
+The new graph page supports multiple chart types for better visualization of recommendation results:
+
+* Bar Chart
+* Horizontal Bar Chart
+* Line Chart
+* Pie Chart
+* Doughnut Chart
+* Radar Chart
+* Polar Area Chart
+
+The graph page also allows users to select different metrics, such as:
+
+* Match Percentage
+* Matched Skill Count
+* Skill Match Score
+
+---
+---
+# Run code 
+## For Traing and Test Model 
+  python3 main.py
+
+## For Webapp
+  python3 webapp/app.py
+
+---
+---
+ ## Future Work
+
+* Deep learning integration 
+* Real-time prediction
+* Explainable dashboard
+
+---
+## 📚 Academic Summary
+
+> The HAF-EPA framework integrates machine learning and knowledge graph reasoning for employee-project allocation. The system uses a supervised learning approach with a Random Forest classifier trained on 80% of the data and evaluated on 20% unseen data. Additionally, an external dataset is used to simulate real-world prediction scenarios. The final output combines ML predictions and knowledge graph reasoning.
 
 ---
 
+## 👨‍💻 Author
+
+**MD Firozur Rahman**
+ID: 22975954
+
+
+---
+
+## 👨‍🎓 Academic Information
+
+<table>
+<tr>
+<td align="center">
+
+**Student**  
+Md Firozur Rahman  
+MSc in Data Science  
+FAU  
+
+</td>
+
+<td align="center">
+
+**Supervisor**  
+Robert Bauer  
+Managing Director  
+TW-Legal Tech  
+
+</td>
+
+<td align="center">
+
+**Professor**  
+Prof. Frauke Liers  
+Head of the Data Science Department  
+FAU  
+
+</td>
+</tr>
+</table>

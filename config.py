@@ -15,6 +15,7 @@ LIMIT_NUMBER = 10
 
 KNOWLEDGE_RECOMMENDED_EXCEL = OUTPUT_DIR / "knowledge_recommended_data.xlsx"
 FINAL_RECOMMENDED_EXCEL = OUTPUT_DIR / "final_recommendations.xlsx"
+EMPLOYEE_REFERENCE_INFORMATION = OUTPUT_DIR / "employee_reference.csv"
 HYBRID_RECOMMENDED_EXCEL = OUTPUT_DIR / "hybrid_recommendations.xlsx"
 
 TRAINED_MODEL = OUTPUT_DIR / "HAF-EPA.joblib"

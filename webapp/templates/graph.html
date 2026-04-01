@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Recommendation Graphs</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root{
+            --bg:#f4f7fb;
+            --card:#ffffff;
+            --text:#1f2937;
+            --muted:#6b7280;
+            --border:#dbe3ee;
+            --primary:#2563eb;
+        }
+        *{box-sizing:border-box}
+        body{
+            margin:0;
+            font-family:Arial, Helvetica, sans-serif;
+            background:var(--bg);
+            color:var(--text);
+        }
+        .container{
+            max-width:1200px;
+            margin:32px auto;
+            padding:0 20px;
+        }
+        .card{
+            background:var(--card);
+            border:1px solid var(--border);
+            border-radius:18px;
+            padding:24px;
+            box-shadow:0 8px 24px rgba(15,23,42,.06);
+        }
+        h1{
+            margin:0 0 10px;
+            font-size:36px;
+        }
+        p{
+            margin:0 0 20px;
+            color:var(--muted);
+            line-height:1.6;
+        }
+        .toolbar{
+            display:flex;
+            flex-wrap:wrap;
+            gap:16px;
+            align-items:end;
+            margin-bottom:24px;
+        }
+        .field{
+            display:flex;
+            flex-direction:column;
+            gap:8px;
+            min-width:230px;
+        }
+        label{
+            font-weight:600;
+        }
+        select{
+            height:46px;
+            border:1px solid var(--border);
+            border-radius:10px;
+            padding:0 12px;
+            font-size:16px;
+            background:#fff;
+        }
+        .summary{
+            display:grid;
+            grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));
+            gap:14px;
+            margin:18px 0 26px;
+        }
+        .metric{
+            padding:16px;
+            border:1px solid var(--border);
+            border-radius:12px;
+            background:#fbfdff;
+        }
+        .metric .k{
+            color:var(--muted);
+            font-size:13px;
+            margin-bottom:6px;
+        }
+        .metric .v{
+            font-size:24px;
+            font-weight:700;
+        }
+        .chart-wrap{
+            position:relative;
+            width:100%;
+            min-height:480px;
+        }
+        .hint{
+            margin-top:14px;
+            font-size:14px;
+            color:var(--muted);
+        }
+        .back-link{
+            display:inline-block;
+            margin-bottom:18px;
+            color:var(--primary);
+            text-decoration:none;
+            font-weight:600;
+        }
+        @media (max-width:768px){
+            h1{font-size:28px}
+            .chart-wrap{min-height:380px}
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a class="back-link" href="/">← Back to recommendations</a>
+
+        <div class="card">
+            <h1>Employee Recommendation Graphs</h1>
+            <p>Select a chart type and a metric to visualize your recommendation results.</p>
+
+            {% set recs = recommendations if recommendations is defined else [] %}
+
+            <div class="summary">
+                <div class="metric">
+                    <div class="k">Total Recommendations</div>
+                    <div class="v">{{ recs|length }}</div>
+                </div>
+                <div class="metric">
+                    <div class="k">Top Candidate</div>
+                    <div class="v">
+                        {% if recs|length > 0 %}
+                            {{ recs[0].full_name }}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="metric">
+                    <div class="k">Highest Match %</div>
+                    <div class="v">
+                        {% if recs|length > 0 %}
+                            {{ recs|map(attribute='match_percentage')|max }}%
+                        {% else %}
+                            0%
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="toolbar">
+                <div class="field">
+                    <label for="chartType">Chart Type</label>
+                    <select id="chartType">
+                        <option value="bar">Bar Chart</option>
+                        <option value="horizontalBar">Horizontal Bar Chart</option>
+                        <option value="line">Line Chart</option>
+                        <option value="pie">Pie Chart</option>
+                        <option value="doughnut">Doughnut Chart</option>
+                        <option value="radar">Radar Chart</option>
+                        <option value="polarArea">Polar Area Chart</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="metricType">Metric</label>
+                    <select id="metricType">
+                        <option value="match_percentage">Match Percentage</option>
+                        <option value="matched_skill_count">Matched Skill Count</option>
+                        <option value="skill_match_score">Skill Match Score</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="chart-wrap">
+                <canvas id="recommendationChart"></canvas>
+            </div>
+
+            <div class="hint">
+                Supported chart types: bar, horizontal bar, line, pie, doughnut, radar, and polar area.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const recommendations = {{ recs | tojson | safe }};
+
+        const labelMap = {
+            match_percentage: "Match Percentage",
+            matched_skill_count: "Matched Skill Count",
+            skill_match_score: "Skill Match Score"
+        };
+
+        const labels = recommendations.map(item => item.full_name);
+
+        function getMetricData(metric) {
+            return recommendations.map(item => Number(item[metric]) || 0);
+        }
+
+        const chartTypeSelect = document.getElementById("chartType");
+        const metricTypeSelect = document.getElementById("metricType");
+        const canvas = document.getElementById("recommendationChart");
+        let chartInstance = null;
+
+        function createConfig(selectedChartType, selectedMetric) {
+            const dataValues = getMetricData(selectedMetric);
+            const metricLabel = labelMap[selectedMetric] || selectedMetric;
+            const baseType = selectedChartType === "horizontalBar" ? "bar" : selectedChartType;
+
+            const config = {
+                type: baseType,
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: metricLabel,
+                        data: dataValues,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true
+                        },
+                        title: {
+                            display: true,
+                            text: `${metricLabel} by Employee`
+                        }
+                    }
+                }
+            };
+
+            if (selectedChartType === "horizontalBar") {
+                config.options.indexAxis = "y";
+            }
+
+            const cartesianCharts = ["bar", "horizontalBar", "line"];
+            if (cartesianCharts.includes(selectedChartType)) {
+                config.options.scales = {
+                    y: {
+                        beginAtZero: true,
+                        max: selectedMetric === "match_percentage" ? 100 : undefined,
+                        title: {
+                            display: true,
+                            text: metricLabel
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: "Employees"
+                        }
+                    }
+                };
+
+                if (selectedChartType === "horizontalBar") {
+                    config.options.scales = {
+                        x: {
+                            beginAtZero: true,
+                            max: selectedMetric === "match_percentage" ? 100 : undefined,
+                            title: {
+                                display: true,
+                                text: metricLabel
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: "Employees"
+                            }
+                        }
+                    };
+                }
+            }
+
+            return config;
+        }
+
+        function renderChart() {
+            const selectedChartType = chartTypeSelect.value;
+            const selectedMetric = metricTypeSelect.value;
+
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
+            chartInstance = new Chart(canvas, createConfig(selectedChartType, selectedMetric));
+        }
+
+        chartTypeSelect.addEventListener("change", renderChart);
+        metricTypeSelect.addEventListener("change", renderChart);
+
+        renderChart();
+    </script>
+</body>
+</html>

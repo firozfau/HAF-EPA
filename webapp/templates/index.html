@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HAF-EPA Employee Recommender</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+  <div class="container">
+    <h1>HAF-EPA Employee Recommender</h1>
+    <p>Upload a project PDF and get the top 10 best-matched employees.</p>
+
+    <form method="POST" enctype="multipart/form-data" class="upload-form">
+      <input type="file" name="project_pdf" accept=".pdf" required />
+      <button type="submit">Upload and Predict</button>
+    </form>
+
+    {% if uploaded_filename %}
+      <form action="/graph" method="post">
+        <input type="hidden" name="data" value='{{ recommendations | tojson | safe }}'>
+        <button type="submit">View Graph</button>
+      </form>
+    {% endif %}
+
+    {% if error %}
+      <div class="error-box">
+        {{ error }}
+      </div>
+    {% endif %}
+
+    {% if uploaded_filename %}
+      <div class="info-box">
+        Uploaded file: <strong>{{ uploaded_filename }}</strong>
+      </div>
+    {% endif %}
+
+    {% if recommendations %}
+      <h2>Top 10 Employees</h2>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Employee ID</th>
+            <th>Name</th>
+            <th>Match %</th>
+            <th>Matched Skills</th>
+            <th>Skill Match Score</th>
+            <th>Employee Skills</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for emp in recommendations %}
+          <tr>
+            <td>{{ loop.index }}</td>
+            <td>{{ emp.employee_id }}</td>
+            <td>{{ emp.full_name }}</td>
+            <td>{{ emp.match_percentage }}%</td>
+            <td>{{ emp.matched_skill_count }}</td>
+            <td>{{ "%.2f"|format(emp.skill_match_score) }}</td>
+            <td>{{ emp.employee_skills | join(', ') }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <div class="preview-box">
+        <h3>Extracted Project Text</h3>
+        <pre>{{ extracted_text }}</pre>
+      </div>
+    {% endif %}
+  </div>
+</body>
+</html>

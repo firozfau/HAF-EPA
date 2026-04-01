@@ -5,6 +5,7 @@
 datasets/*
 output/*
 .vscode/*
+webapp/uploads/*
 
 # BUT keep the folders (using placeholder file)
 !datasets/.gitkeep
