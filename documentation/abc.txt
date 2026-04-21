@@ -1,0 +1,13 @@
+Correct order
+Data load
+Normalize
+Pair creation
+Feature engineering
+Label generation
+Train/test split
+Training set balancing
+80% data দিয়ে training model create
+20% data দিয়ে model test
+Hybrid recommendation generate
+Top 200 employee list generate
+Top 10 recommendation display

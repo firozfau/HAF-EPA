@@ -1,0 +1,12 @@
+
+process/feature_engineering.py
+
+এই code-এ আমরা include করবো:
+
+skill relationship ✅
+skill-specific experience ✅
+past performance / match quality ✅
+task context ✅
+availability ✅
+required vs optional skills ✅
+soft-skill compatibility ✅

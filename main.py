@@ -1,173 +1,166 @@
 from __future__ import annotations
 
-from models.generate_train_model import generate_train_model
-from models.evaluate_model import evaluate_model
-from models.test_model import test_model
-from knowledge_graph.kg_recommend import kg_recommend
-from models.final_recommendation import generate_final_recommendation
-from models.hybrid_recommendation import hybrid_recommendation
-from helper.model_required import is_traing_model_available
-from process.employee_reference import create_employee_reference
+from data_loader.load_datasets import load_datasets
+from process.normalize import normalize_loaded_data
 
-from config import (FINAL_RECOMMENDED_EXCEL,HYBRID_RECOMMENDED_EXCEL,KNOWLEDGE_RECOMMENDED_EXCEL,)
-
-
-# =========================================================
-# PIPELINE CONTROL SWITCHES
-# =========================================================
-
-# 1. Training switch
-# Turn ON only when you want to retrain the model.
-RUN_GENERATE_TRAIN_MODEL = False
-
-# 2. Internal held-out evaluation (20% test split)
-RUN_EVALUATE_MODEL = True
-
-# 3. External test dataset prediction + external metrics
-RUN_TEST_MODEL = True
-
-# 4. Knowledge Graph recommendation
-RUN_KG_RECOMMEND = True
-
-# 5. Final recommendation (ML only)
-RUN_FINAL_RECOMMENDATION = True
-
-# 6. Hybrid recommendation (ML + KG)
-RUN_HYBRID_RECOMMENDATION = True
+from models.train_model import train_haf_epa_model, FEATURE_COLUMNS
+from pipeline.prepare_dataset import prepare_labeled_dataset
+from pipeline.split_data import split_train_test
+from pipeline.balance_data import balance_training_data
+from pipeline.evaluate import evaluate_model
+from pipeline.recommend import generate_test_recommendations
+from pipeline.export_results import (
+    save_feature_importance,
+    save_balanced_training_data,
+    save_test_predictions_csv,
+    save_recommendation_excel,
+    save_evaluation_report,
+)
+from pipeline.export_top_employees import (
+    create_top_employee_summary,
+    save_top_employee_summary_excel,
+)
 
 
-# =========================================================
-# PROJECT SELECTION AND OUTPUT CONTROL
-# =========================================================
+FEATURE_IMPORTANCE_FILENAME = "HAF-EPA_feature_importance.csv"
+BALANCED_TRAIN_FILENAME = "HAF-EPA_balanced_training_dataset.csv"
+TEST_PREDICTIONS_FILENAME = "HAF-EPA_test_predictions.csv"
+RECOMMENDATION_FILENAME = "HAF-EPA_test_recommendations.xlsx"
+EVALUATION_FILENAME = "HAF-EPA_model_evaluation.txt"
+TOP_EMPLOYEE_FILENAME = "HAF-EPA_top_200_employees.xlsx"
 
-selected_project_id = "P00024"
-top_k = 500
-total_number_hybrid = 500
 
+def main():
+    print("\n=== STEP 1: PREPARE LABELED DATASET ===")
+    labeled_df = prepare_labeled_dataset(performance_threshold=7.0)
+    print("Labeled dataset shape:", labeled_df.shape)
 
-def main() -> None:
-    print("\n Welcome to HAF-EPA \n")
+    print("\nFull label distribution:")
+    print(labeled_df["label"].value_counts())
 
-    graph_rec = None
-    predicted_DataFrame = None
-    final_rec = None
-    hybrid_rec = None
+    print("\n=== STEP 2: TRAIN / TEST SPLIT (80/20, NO LEAKAGE) ===")
+    train_df, test_df = split_train_test(
+        labeled_df=labeled_df,
+        feature_columns=FEATURE_COLUMNS,
+        test_size=0.20,
+        random_state=42,
+    )
 
-    # =====================================================
-    # 1. Training stage
-    # =====================================================
-    if RUN_GENERATE_TRAIN_MODEL:
-        print("1) Training stage started...")
-        trained = generate_train_model()
-        print("=> Training completed successfully")
+    print("Train shape:", train_df.shape)
+    print("Test shape:", test_df.shape)
 
-    if not is_traing_model_available():
-        print(" ==> No trained model was found; it must be trained and generated.")
-    else:
+    print("\nTrain label distribution (before balancing):")
+    print(train_df["label"].value_counts())
 
-        # =====================================================
-        # 2. Internal evaluation stage
-        # =====================================================
-        if RUN_EVALUATE_MODEL:
-            print("\n2) Internal evaluation stage started...")
-            evaluate_metrics = evaluate_model()
+    print("\nTest label distribution:")
+    print(test_df["label"].value_counts())
 
-            print("       Model Accuracy :", evaluate_metrics.accuracy)
-            print("       Precision      :", evaluate_metrics.precision)
-            print("       Recall         :", evaluate_metrics.recall)
-            print("       F1-score       :", evaluate_metrics.f1)
-            print("       Threshold      :", evaluate_metrics.threshold)
-            print("       Confusion Matrix:", evaluate_metrics.confusion_matrix)
-            print("   => Internal evaluation completed successfully")
-        else:
-            print("\n2) Internal evaluation stage skipped.")
+    print("\n=== STEP 3: BALANCE TRAINING SET ONLY ===")
+    balanced_train_df = balance_training_data(
+        train_df=train_df,
+        negative_multiplier=3,
+        random_state=42,
+    )
 
-        # =====================================================
-        # 3. Knowledge Graph recommendation
-        # =====================================================
-        if RUN_KG_RECOMMEND:
-            print("\n3) Knowledge Graph recommendation stage started...")
-            graph_rec = kg_recommend()
+    print("Balanced train shape:", balanced_train_df.shape)
 
-            if graph_rec is not None and not graph_rec.empty:
-                graph_rec.to_excel(KNOWLEDGE_RECOMMENDED_EXCEL, index=False)
-                print(f"   => Saved: {KNOWLEDGE_RECOMMENDED_EXCEL}")
-                print("   => Knowledge Graph recommendation completed successfully")
-            else:
-                print("   => KG recommendation returned empty data.")
-        else:
-            print("\n3) Knowledge Graph recommendation stage skipped.")
+    print("\nBalanced train label distribution:")
+    print(balanced_train_df["label"].value_counts())
 
-        # =====================================================
-        # 4. External test dataset stage
-        # =====================================================
-        if RUN_TEST_MODEL:
-            print("\n4) External test + project prediction stage started...")
+    print("\n=== STEP 4: TRAIN HAF-EPA MODEL ===")
+    model, feature_importance_df, model_path = train_haf_epa_model(
+        balanced_train_df=balanced_train_df,
+        random_state=42,
+    )
+    print(f"Model saved to: {model_path}")
 
-            # IMPORTANT: Use full external employee pool during testing.
-            test_result = test_model(project_id=selected_project_id, candidate_employee_ids=None,)
+    print("\n=== STEP 5: TEST ON HELD-OUT 20% DATA ===")
+    evaluation_result = evaluate_model(model, test_df)
 
-            predicted_DataFrame = test_result.predicted_df
-            print("Total predicted rows:", test_result.total_rows)
+    print("Accuracy:", evaluation_result["accuracy"])
 
-            if test_result.accuracy is not None:
-                print("\nExternal test metrics:")
-                print("      Accuracy :", test_result.accuracy)
-                print("      Precision:", test_result.precision)
-                print("      Recall   :", test_result.recall)
-                print("      F1-score :", test_result.f1)
-                print("      Threshold:", test_result.threshold)
-                print("      Confusion Matrix:", test_result.confusion_matrix)  
-                print("=> External test + prediction completed successfully")
-            else:
-                print("   => External metrics could not be computed because labels were unavailable.")
-        else:
-            print("\n4) External test + project prediction stage skipped.")
+    print("\nConfusion Matrix:")
+    print(evaluation_result["confusion_matrix"])
 
-        # =====================================================
-        # 5. Final recommendation (ML only)
-        # =====================================================
-        if RUN_FINAL_RECOMMENDATION:
-            print("\n5) Final recommendation stage [ML only] started...")
+    print("\nClassification Report:")
+    print(evaluation_result["classification_report"])
 
-            if predicted_DataFrame is None or predicted_DataFrame.empty:
-                print("   => Final recommendation skipped because prediction data is empty.")
-            else:
-                final_rec = generate_final_recommendation( predicted_DataFrame[ predicted_DataFrame["project_id"] == selected_project_id ], top_k=top_k,  )
-                
-                if final_rec is None or final_rec.empty:
-                    print("   => Final recommendation is empty. No file saved.")
-                else:
-                    final_rec.to_excel(FINAL_RECOMMENDED_EXCEL, index=False)
-                    print(f"   Saved: {FINAL_RECOMMENDED_EXCEL}")
-                    create_employee_reference(final_rec);
-                    print("=> Final recommendation generated successfully")
-        else:
-            print("\n5) Final recommendation stage skipped.")
+    print("\n=== STEP 6: GENERATE HYBRID RECOMMENDATIONS ON TEST SET ===")
+    recommendation_df = generate_test_recommendations(model, test_df)
 
-        # =====================================================
-        # 6. Hybrid recommendation (ML + KG)
-        # =====================================================
-        if RUN_HYBRID_RECOMMENDATION:
-            print("\n6) Hybrid recommendation stage [ML + KG] started...")
+    print("\nTop 10 recommendations:")
+    print(recommendation_df.head(10))
 
-            if predicted_DataFrame is None or predicted_DataFrame.empty:
-                print("   => Hybrid recommendation skipped because ML prediction data is missing.")
-            elif graph_rec is None or graph_rec.empty:
-                print("   => Hybrid recommendation skipped because KG recommendation data is missing.")
-            else:
-                hybrid_rec = hybrid_recommendation(predicted_df=predicted_DataFrame, graph_rec=graph_rec, project_id=selected_project_id, top_k=total_number_hybrid,)
+    print("\n=== STEP 7: SAVE OUTPUTS ===")
+    feature_importance_path = save_feature_importance(
+        feature_importance_df,
+        FEATURE_IMPORTANCE_FILENAME,
+    )
 
-                if hybrid_rec is None or hybrid_rec.empty:
-                    print("   => Hybrid recommendation is empty. No file saved.")
-                else:
-                    hybrid_rec.to_excel(HYBRID_RECOMMENDED_EXCEL, index=False)
-                    print(f"   Saved: {HYBRID_RECOMMENDED_EXCEL}")
-                    print("=> Hybrid recommendation generated successfully")
-        else:
-            print("\n6) Hybrid recommendation stage skipped.")
+    balanced_train_path = save_balanced_training_data(
+        balanced_train_df,
+        BALANCED_TRAIN_FILENAME,
+    )
 
-        print("\n HAF-EPA has been successfully completed. \n")
+    test_predictions_path = save_test_predictions_csv(
+        recommendation_df,
+        TEST_PREDICTIONS_FILENAME,
+    )
+
+    recommendation_excel_path = save_recommendation_excel(
+        recommendation_df,
+        RECOMMENDATION_FILENAME,
+    )
+
+    evaluation_report_path = save_evaluation_report(
+        filename=EVALUATION_FILENAME,
+        accuracy=evaluation_result["accuracy"],
+        confusion_mat=evaluation_result["confusion_matrix"],
+        class_report=evaluation_result["classification_report"],
+        train_shape=train_df.shape,
+        test_shape=test_df.shape,
+        balanced_train_shape=balanced_train_df.shape,
+        train_label_counts=train_df["label"].value_counts(),
+        test_label_counts=test_df["label"].value_counts(),
+    )
+
+    print(f"Feature importance saved to: {feature_importance_path}")
+    print(f"Balanced training data saved to: {balanced_train_path}")
+    print(f"Test predictions CSV saved to: {test_predictions_path}")
+    print(f"Recommendation Excel saved to: {recommendation_excel_path}")
+    print(f"Evaluation report saved to: {evaluation_report_path}")
+
+    print("\n=== STEP 8: CREATE TOP 200 EMPLOYEE SUMMARY EXCEL ===")
+
+    # Reload source data for employee-level export
+    raw_data = load_datasets()
+    raw_data = normalize_loaded_data(raw_data)
+
+    top_employee_df = create_top_employee_summary(
+        recommendation_df=recommendation_df,
+        employees_df=raw_data.employees,
+        employee_skills_df=raw_data.employee_skills,
+        skills_df=raw_data.skills,
+        employee_project_history_df=raw_data.employee_project_history,
+        employee_availability_df=raw_data.employee_availability,
+        employee_relationship_df=raw_data.employee_relationship,
+        top_n=200,
+    )
+
+    top_employee_excel_path = save_top_employee_summary_excel(
+        top_employee_df=top_employee_df,
+        filename=TOP_EMPLOYEE_FILENAME,
+    )
+
+    print(f"Top 200 employee Excel saved to: {top_employee_excel_path}")
+
+    print("\n=== TOP 10 FEATURE IMPORTANCE ===")
+    print(feature_importance_df.head(10))
+
+    print("\n=== TOP 10 EMPLOYEES ===")
+    print(top_employee_df.head(10))
+
+    print("\nHAF-EPA PIPELINE COMPLETED SUCCESSFULLY ✅")
 
 
 if __name__ == "__main__":

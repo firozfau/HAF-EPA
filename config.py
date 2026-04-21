@@ -2,9 +2,10 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent
 DATASET_DIR = BASE_DIR / "datasets"
-DATASET_1_DIR = DATASET_DIR / "dataset-1"
-DATASET_2_DIR = DATASET_DIR / "dataset-2"
+ 
+TRAINING_DATASET_DIR = DATASET_DIR / "training-dataset"
 TEST_DATASET_DIR = DATASET_DIR / "test-dataset"
+ 
 OUTPUT_DIR = BASE_DIR / "output"
 
 RANDOM_STATE = 42 
