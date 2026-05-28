@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import ast
 import pandas as pd
 from config import OUTPUT_DIR
 
@@ -246,4 +247,169 @@ def save_top_employee_summary_excel(
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     output_path = OUTPUT_DIR / filename
     top_employee_df.to_excel(output_path, index=False)
+    return output_path
+
+
+def save_employee_reference_csv(
+    top_employee_df: pd.DataFrame,
+    filename: str = "HAF-EPA_employee_reference.csv",
+):
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
+    employee_reference_df = top_employee_df.copy()
+
+    # employee free time calculation: availability = 100% - avg_allocation_percent
+    employee_reference_df["availability"] = 100 - employee_reference_df["avg_allocation_percent"]
+
+    #need to rename skills column to employee_skills for webapp compatibility
+    employee_reference_df = employee_reference_df.rename(columns={
+        "skills": "employee_skills"
+    })
+
+    # -----------------------------
+    # Programming and management skill groups
+    # -----------------------------
+    # Programming score and management score must not use the same logic.
+    # Programming score depends mainly on technical/programming skills.
+    # Management score depends on management skills + experience + availability + project work.
+    programming_skills = {
+        "python", "java", "javascript", "typescript", "php", "laravel",
+        "react", "angular", "vue", "node.js", "node", "django", "flask",
+        "spring boot", "html", "css", "sql", "mysql", "postgresql",
+        "mongodb", "docker", "kubernetes", "aws", "azure", "git",
+        "linux", "machine learning", "deep learning", "data analysis",
+        "data science", "ui/ux design", "go", "rust", "scala",
+        "android", "ios", "tensorflow", "pytorch", "devops",
+        "automation testing", "cybersecurity", "testing", "c++", "c#"
+    }
+
+    management_skills = {
+        "project management", "agile", "scrum", "leadership",
+        "team management", "communication", "planning", "coordination",
+        "risk management", "time management", "stakeholder management",
+        "resource management", "budgeting", "documentation",
+        "presentation", "decision making", "problem solving",
+        "requirement analysis", "business analysis", "quality management",
+        "client communication", "project planning", "sprint planning",
+        "task management", "team leadership", "conflict resolution",
+        "strategic thinking", "negotiation", "process improvement"
+    }
+
+    def parse_skill_list(value):
+        if pd.isna(value):
+            return []
+
+        if isinstance(value, list):
+            return [str(skill).strip() for skill in value if str(skill).strip()]
+
+        text = str(value).strip()
+
+        try:
+            parsed = ast.literal_eval(text)
+            if isinstance(parsed, list):
+                return [str(skill).strip() for skill in parsed if str(skill).strip()]
+        except Exception:
+            pass
+
+        return [
+            str(skill).strip()
+            for skill in text.split(",")
+            if str(skill).strip()
+        ]
+
+    def count_category_skills(skill_text, category_set):
+        skills = parse_skill_list(skill_text)
+
+        return sum(
+            1
+            for skill in skills
+            if skill.lower() in category_set
+        )
+
+    def percentage(part, total):
+        if total == 0:
+            return 0.0
+
+        return round((part / total) * 100, 2)
+
+    employee_reference_df["total_skill_count"] = employee_reference_df["employee_skills"].apply(
+        lambda value: len(parse_skill_list(value))
+    )
+
+    employee_reference_df["programming_skill_count"] = employee_reference_df["employee_skills"].apply(
+        lambda value: count_category_skills(value, programming_skills)
+    )
+
+    employee_reference_df["management_skill_count"] = employee_reference_df["employee_skills"].apply(
+        lambda value: count_category_skills(value, management_skills)
+    )
+
+    employee_reference_df["programming_skill_percentage"] = employee_reference_df.apply(
+        lambda row: percentage(row["programming_skill_count"], row["total_skill_count"]),
+        axis=1,
+    )
+
+    employee_reference_df["management_skill_percentage"] = employee_reference_df.apply(
+        lambda row: percentage(row["management_skill_count"], row["total_skill_count"]),
+        axis=1,
+    )
+
+    # Estimated project working count comes from employee history summary.
+    # If the column is missing, use 0 safely.
+    if "total_project_work" not in employee_reference_df.columns:
+        employee_reference_df["total_project_work"] = 0
+
+    employee_reference_df["estimated_project_working_count"] = employee_reference_df[
+        "total_project_work"
+    ].fillna(0)
+
+    # Programming score mostly depends on programming skills.
+    employee_reference_df["programming_score"] = employee_reference_df[
+        "programming_skill_percentage"
+    ].round(2)
+
+    # Management score should not be same as programming score.
+    # It depends on management skills, experience, availability, and project history.
+    employee_reference_df["experience_score"] = employee_reference_df["experience"].apply(
+        lambda value: min((float(value) / 10) * 100, 100)
+    )
+
+    employee_reference_df["availability_score"] = employee_reference_df["availability"].apply(
+        lambda value: max(0.0, min(float(value), 100.0))
+    )
+
+    employee_reference_df["project_work_score"] = employee_reference_df[
+        "estimated_project_working_count"
+    ].apply(
+        lambda value: min((float(value) / 20) * 100, 100)
+    )
+
+    employee_reference_df["management_score"] = (
+        employee_reference_df["management_skill_percentage"] * 0.45
+        + employee_reference_df["experience_score"] * 0.25
+        + employee_reference_df["availability_score"] * 0.15
+        + employee_reference_df["project_work_score"] * 0.15
+    ).round(2)
+
+    reference_columns = [
+        "employee_id",
+        "full_name",
+        "employee_skills",
+        "experience",
+        "availability",
+        "total_skill_count",
+        "programming_skill_count",
+        "management_skill_count",
+        "programming_skill_percentage",
+        "management_skill_percentage",
+        "estimated_project_working_count",
+        "programming_score",
+        "management_score",
+    ]
+
+    employee_reference_df = employee_reference_df[reference_columns].copy()
+
+    output_path = OUTPUT_DIR / filename
+    employee_reference_df.to_csv(output_path, index=False)
+
     return output_path

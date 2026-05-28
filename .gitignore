@@ -2,7 +2,7 @@
 .DS_Store
 
 # Ignore all files inside these folders
-datasets/*
+ 
 output/*
 .vscode/*
 webapp/uploads/*

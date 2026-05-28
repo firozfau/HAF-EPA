@@ -247,41 +247,33 @@ predicted_score (0 → 1)
 
 ## ▶️ How to Run
 
-### Train Model
+### Create Enviroment
 
 ```python
-RUN_GENERATE_TRAIN_MODEL = True
+python3 -m venv venv
 ```
+### Active Enviroment
+
+```python
+source venv/bin/activate
+``` 
+
+
+### Install required lib
+
+```python
+python -m pip install -r requirements.txt
+```
+### Run main file 
+
+```python
+python3 main.py
+```
+
 
 ---
 
-### Evaluate Model (20%)
-
-```python
-RUN_EVALUATE_MODEL = True
-```
-
----
-
-### External Testing
-
-```python
-RUN_TEST_MODEL = True
-```
-
----
-
-### Recommendation
-
-```python
-RUN_KG_RECOMMEND = True
-RUN_FINAL_RECOMMENDATION = True
-RUN_HYBRID_RECOMMENDATION = True
-```
-
----
-
-## ⚠️ Important Design Principles
+## Important Design Principles
 
 ### ✔ Separation of Pipeline
 
