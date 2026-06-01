@@ -323,32 +323,31 @@ This project demonstrates a **production-ready hybrid AI system** combining:
 ---
 ---
 ### WebApp Project Structure (HAF-EPA)
----
+
+```text
 HAF-EPA/
 │
 ├── webapp/
 │   ├── src/
-│   │   ├── *.py
+│   │   └── *.py
 │   │
-│   ├── templates
+│   ├── templates/
 │   │   ├── index.html
 │   │   └── graph.html
 │   │
 │   ├── static/
-│   │   ├── css/
-│   │   ├── js/
+│   │   ├── css/js
+│   │   
 │   │
 │   ├── uploads/
 │   │
 │   ├── app.py
-│   │
 │   └── requirements.txt
 │
-├── output/
+└── output/
     ├── HAF-EPA.joblib
-    └── employee_reference.csv
-
-
+    └── HAF-EPA_employee_reference.csv
+```
 ---
 
 ### 🌐 Web Application Integration
