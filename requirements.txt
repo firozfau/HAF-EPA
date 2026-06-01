@@ -1,9 +1,11 @@
+flask
+werkzeug
 pandas
 numpy
 scikit-learn
-flask
 joblib
 pymupdf
-werkzeug
 openpyxl
 matplotlib
+python-dateutil
+gunicorn

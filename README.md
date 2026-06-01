@@ -245,34 +245,6 @@ predicted_score (0 → 1)
 
 ---
 
-## ▶️ How to Run
-
-### Create Enviroment
-
-```python
-python3 -m venv venv
-```
-### Active Enviroment
-
-```python
-source venv/bin/activate
-``` 
-
-
-### Install required lib
-
-```python
-python -m pip install -r requirements.txt
-```
-### Run main file 
-
-```python
-python3 main.py
-```
-
-
----
-
 ## Important Design Principles
 
 ### ✔ Separation of Pipeline
@@ -437,17 +409,44 @@ The graph page also allows users to select different metrics, such as:
 ---
 ---
 # Run code 
-## For Traing and Test Model 
-  python3 main.py
-
-## For Webapp
-  python3 webapp/app.py
-
-## if there is need to enviroment setup we can 
+### Create Virtual Environment
+```bash
 python3 -m venv venv
-source venv/bin/activate
+```
+### Activate Virtual Environment
 
+#### macOS / Linux
+
+```bash
+source venv/bin/activate
+```
+
+#### Windows
+
+```bash
+venv\Scripts\activate
+```
+### Install Required Packages
+
+```bash
+python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
+```
+---
+---
+
+## Train and Test Model
+
+```bash
+python3 main.py
+```
+
+## Run Web Application
+
+```bash
+python3 webapp/app.py
+```
+
 ---
 ---
  ## Future Work
