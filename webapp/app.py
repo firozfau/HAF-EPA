@@ -19,7 +19,6 @@ UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 @app.route("/", methods=["GET", "POST"])
 def index():
     recommendations = []
-    extracted_text = ""
     error = None
     uploaded_filename = ""
 
@@ -36,7 +35,7 @@ def index():
                 saved_path = UPLOAD_DIR / uploaded_filename
                 uploaded_file.save(saved_path)
 
-                recommendations, extracted_text = recommend_top_employees_from_pdf(
+                recommendations, _ = recommend_top_employees_from_pdf(
                     pdf_path=str(saved_path),
                     top_k=10,
                 )
@@ -47,7 +46,6 @@ def index():
     return render_template(
         "index.html",
         recommendations=recommendations,
-        extracted_text=extracted_text,
         error=error,
         uploaded_filename=uploaded_filename,
     )
@@ -63,6 +61,7 @@ def graph():
         recommendations = []
 
     return render_template("graph.html", recommendations=recommendations)
+
 
 if __name__ == "__main__":
     app.run(debug=True)

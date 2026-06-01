@@ -20,6 +20,18 @@ document.addEventListener("DOMContentLoaded", function () {
         projectMatchSkill: "#ffc64d"
     };
 
+    function getPercentageValue(...values) {
+        for (const value of values) {
+            const numericValue = Number(value);
+
+            if (!Number.isNaN(numericValue) && numericValue > 0) {
+                return numericValue;
+            }
+        }
+
+        return 0;
+    }
+
     function getFilteredRecommendations() {
         const selectedEmployee = employeeSelect.value;
 
@@ -35,16 +47,22 @@ document.addEventListener("DOMContentLoaded", function () {
             rows: filteredData,
             labels: filteredData.map(item => item.full_name),
 
+            // Management Skill should show the employee profile management score.
+            // Do not use only management_project_match_percentage here, because that value
+            // becomes 0 when the uploaded PDF has no management-category required skill.
             managementSkill: filteredData.map(item =>
-                Number(item.management_project_match_percentage) || 0
+                getPercentageValue(item.management_score, item.management_skill_percentage, item.management_project_match_percentage)
             ),
 
+            // Programming Skill should show the employee profile programming score.
+            // PDF-based programming_project_match_percentage is used only as fallback.
             programmingSkill: filteredData.map(item =>
-                Number(item.programming_project_match_percentage) || 0
+                getPercentageValue(item.programming_score, item.programming_skill_percentage, item.programming_project_match_percentage)
             ),
 
+            // Project Match Skill is the actual required-skill match from uploaded PDF.
             projectMatchSkill: filteredData.map(item =>
-                Number(item.overall_project_match_percentage) || 0
+                getPercentageValue(item.overall_project_match_percentage, item.match_percentage)
             )
         };
     }
