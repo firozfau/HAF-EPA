@@ -1,4 +1,10 @@
-# HAF-EPA: Hybrid AI Framework for Employee Project Allocation
+<h1 align="center" style="font-size:30px; border-bottom:0px">
+Hybrid AI Framework for Employee Project Allocation
+</h1>
+
+<h1 align="center" style="font-size:30px; margin-top:-10px">
+HAF-EPA
+</h1>
 
 HAF-EPA is a machine-learning-based employee recommendation framework for project allocation.
 It trains a Random Forest model on employee-project feature vectors and then uses the trained model to recommend the most suitable employees for a new project description.
