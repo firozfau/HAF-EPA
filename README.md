@@ -1,465 +1,505 @@
 # HAF-EPA: Hybrid AI Framework for Employee Project Allocation
 
----
+HAF-EPA is a machine-learning-based employee recommendation framework for project allocation.
+It trains a Random Forest model on employee-project feature vectors and then uses the trained model to recommend the most suitable employees for a new project description.
 
-## 📖 Overview
-
-HAF-EPA (Hybrid AI Framework for Employee Project Allocation) is an intelligent system designed to automatically recommend the most suitable employees for a given project.
-
-The framework integrates:
-
-*-**Machine Learning (Random Forest)**
-*-**Knowledge Graph Reasoning**
-*-**Rule-Based Filtering**
-
-to improve accuracy, efficiency, and fairness in employee allocation.
+The project also includes a Flask web application that demonstrates how the trained model can be used in a practical scenario by uploading a project PDF and showing the Top-10 recommended employees.
 
 ---
 
-## Objectives
+## Main Purpose
 
-* Automate employee-to-project assignment
-* Reduce manual bias and inefficiency
-* Improve decision accuracy
-* Recommend **Top-K best employees** for each project
-* Support real-world decision-making systems
-
----
-
-## 🏗️ System Architecture
+The main purpose of this repository is to demonstrate the complete HAF-EPA workflow:
 
 ```text
-Raw Data
-→ Data Preprocessing & Normalization
-→ Employee-Project Pair Creation
-→ Feature Engineering
-→ Label Generation
-→ Train/Test Split (80/20)
-→ Machine Learning Model (Random Forest)
-→ Model Evaluation
-→ External Testing
-→ Prediction Pipeline
-→ Knowledge Graph Recommendation
-→ Final Recommendation (ML)
-→ Hybrid Recommendation (ML + KG)
+Employee and project datasets
+        ↓
+Data preprocessing
+        ↓
+Employee-project pair generation
+        ↓
+Feature engineering
+        ↓
+Suitability labelling
+        ↓
+Train/test split
+        ↓
+Class balancing
+        ↓
+Random Forest model training
+        ↓
+Model evaluation
+        ↓
+Top-N recommendation generation
+        ↓
+Flask web application demonstration
 ```
+
+The web application is not the main thesis contribution. It is a demonstration platform that shows how the trained HAF-EPA model can be applied to a real-world-style project description.
 
 ---
 
-## 📂 Project Structure
+## Current Implementation Status
+
+This repository currently implements:
+
+- Employee-project pair generation
+- Feature engineering with 19 engineered features
+- Binary suitability labelling
+- Train/test split
+- Class balancing
+- Random Forest model training
+- Model evaluation
+- Top-N recommendation export
+- Employee reference export for the web application
+- Flask-based PDF upload and recommendation demo
+- Explainable recommendation display:
+  - extracted project skills
+  - matched employee skills
+  - project match percentage
+  - machine-learning suitability percentage
+  - recommendation reason
+
+Important note: the current runnable code uses a Random Forest model for the prediction component. Knowledge graph reasoning is discussed in the thesis/framework concept, but there is no separate runnable `knowledge_graph/` module in this repository.
+
+---
+
+## Project Structure
 
 ```text
 HAF-EPA/
-├── data_loader/
-├── process/
-├── models/
-├── knowledge_graph/
-├── output/
 ├── config.py
 ├── main.py
-└── README.md
-```
-
----
----
-## 📊 Dataset
-
-This project uses a **synthetic dataset** designed to simulate real-world employee–project allocation scenarios.
-
-The dataset includes:
-
-* Employees
-* Projects
-* Tasks
-* Skills
-* Employee-Skill Mapping
-* Project-Skill Mapping
-
-### 🔗 Data Source
-
-The dataset is publicly available on Kaggle:
-
-👉 https://www.kaggle.com/datasets/firozfau/software-development-employee-project-dataset
-
-### ⚠️ Note
-
-* The dataset is **synthetically generated** for research and experimental purposes.
-* It does not contain real personal or organizational data.
-* It is designed to reflect realistic software development project environments.
-
-
----
-## ⚙️ Workflow
-
-### 1️⃣ Data Loading
-
-* Employees
-* Projects
-* Tasks
-* Skills
-
----
-
-### 2️⃣ Data Preprocessing
-
-* Cleaning
-* Validation
-* Normalization
-* Skill mapping
-
----
-
-### 3️⃣ Employee-Project Pair Creation
-
-Each row represents:
-
-```
-(Employee + Project)
-```
-
----
-
-### 4️⃣ Feature Engineering
-
-* matched skill count
-* skill match score
-* experience score
-* availability score
-* skill coverage
-* primary skill match
-
----
-
-### 5️⃣ Label Generation
-
-* `1` → Suitable
-* `0` → Not Suitable
-
----
-
-## 🤖 Machine Learning Model
-
-### Model Used
-
-* Random Forest Classifier
-
-### Why Random Forest?
-
-* Works well with tabular data
-* Handles non-linear relationships
-* Reduces overfitting
-* No heavy preprocessing needed
-
----
-
-## 📊 Training & Testing
-
-###  Train-Test Split Implementation
-
-```python
-X_train, X_test, y_train, y_test = train_test_split(
-    X,
-    y,
-    test_size=0.2,
-    random_state=42,
-    stratify=y
-)
-```
-
-* 80% → Training
-* 20% → Internal Testing (Unseen Data)
-
----
-
-### Training Phase
-
-* Model learns from full dataset
-* Saved as:
-
-```
-HAF-EPA.joblib
-```
-
----
-
-### Internal Testing (Held-out 20%)
-
-* Uses unseen test data
-* Metrics:
-
-  * Accuracy
-  * Precision
-  * Recall
-  * F1-score
-
----
-
-## External Testing 
-
-The system also supports **external unseen dataset evaluation**:
-
-* Uses `datasets/test-dataset/`
-* Completely independent from training data
-* Simulates real-world scenario
-
-👉 If labels exist:
-
-* metrics are calculated
-
-👉 If labels do not exist:
-
-* only prediction is performed
-
----
-
-## Prediction Pipeline
-
-* Load trained model
-* Generate features
-* Predict suitability score
-
-```
-predicted_score (0 → 1)
-```
-
----
-
-## Knowledge Graph Recommendation
-
-* Uses full dataset
-* Builds relationships:
-
-  * Employee ↔ Skills ↔ Projects
-
----
-
-## 🏆 Recommendation System
-
-### ML Recommendation
-
-* Top-K based on predicted score
-
-### 🔗 Hybrid Recommendation
-
-* ML + Knowledge Graph combined
-
----
-
-## Important Design Principles
-
-### ✔ Separation of Pipeline
-
-| Stage         | Data         |
-| ------------- | ------------ |
-| Training      | 80%          |
-| Internal Test | 20%          |
-| External Test | New dataset  |
-| Prediction    | Model output |
-
----
-
-### ✔ Modular Execution
-
-Each stage can be turned ON/OFF using flags:
-
-* Avoid retraining
-* Fast demo for viva
-* Efficient pipeline
-
----
-
-### ✔ Model Validation
-
-Before inference:
-
-* Check if model exists
-* Check if test data exists
-
----
-
-## Example Output
-
-| Employee | Score |
-| -------- | ----- |
-| Emp1     | 0.94  |
-| Emp2     | 0.91  |
-| Emp3     | 0.88  |
-
----
-
-## Key Contributions
-
-* Hybrid AI (ML + KG)
-* External testing support
-* Modular pipeline
-* Real-world simulation
-* Explainable system
-
-
----
-
-## Final Note
-
-This project demonstrates a **production-ready hybrid AI system** combining:
-
-* Machine Learning
-* Knowledge Graph
-* Real-world testing
- 
----
----
-
-### 👥 Real-World Employee Allocation
-
-* Uses the full employee dataset
-* Automatically matches employees with project requirements
-* Generates **Top best-fit employees** based on:
-
-  * Skill matching
-  * Experience
-  * Availability
-  * ML prediction score
-
----
----
-### WebApp Project Structure (HAF-EPA)
-
-```text
-HAF-EPA/
+├── requirements.txt
+├── README.md
+│
+├── datasets/
+│   ├── training-dataset/
+│   └── test-dataset/
+│
+├── data_loader/
+│   └── load_datasets.py
+│
+├── process/
+│   ├── normalize.py
+│   ├── pair_creation.py
+│   ├── feature_engineering.py
+│   └── lebel_employee_project.py
+│
+├── pipeline/
+│   ├── prepare_dataset.py
+│   ├── split_data.py
+│   ├── balance_data.py
+│   ├── evaluate.py
+│   ├── recommend.py
+│   ├── export_results.py
+│   └── export_top_employees.py
+│
+├── models/
+│   ├── train_model.py
+│   └── predict.py
+│
+├── helper/
+│   ├── loader.py
+│   └── model_required.py
 │
 ├── webapp/
+│   ├── app.py
 │   ├── src/
-│   │   └── *.py
-│   │
+│   │   ├── predictor.py
+│   │   ├── pdf_parser.py
+│   │   ├── project_parser.py
+│   │   └── pdf_context_validation.py
 │   ├── templates/
 │   │   ├── index.html
 │   │   └── graph.html
-│   │
-│   ├── static/
-│   │   ├── css/js
-│   │   
-│   │
-│   ├── uploads/
-│   │
-│   ├── app.py
-│   └── requirements.txt
+│   └── static/
+│       ├── style.css
+│       ├── graph.css
+│       └── graph.js
 │
+├── webapp-test-pdf-file/
+│   ├── StockPro.pdf
+│   └── StockPro_Detailed_Project_Brief.pdf
+│
+├── project_explanation/
 └── output/
-    ├── HAF-EPA.joblib
-    └── HAF-EPA_employee_reference.csv
 ```
----
-
-### 🌐 Web Application Integration
-
-* A user-friendly web interface will be developed
-* Features include:
-
-  * Project upload (PDF / form input)
-  * Real-time prediction results
-  * Interactive dashboards
 
 ---
 
-### 📊 Visualization & User Interaction
+## Dataset
 
-* Visual graphs and analytics for:
+The project uses a synthetic software-development employee-project dataset.
 
-  * Employee ranking
-  * Skill matching score
-  * Recommendation explanation
-* Enhances interpretability and decision-making
+The dataset includes:
 
----
-## Current Web Application Workflow
+- employees
+- projects
+- tasks
+- skills
+- employee-skill mapping
+- project-skill mapping
+- employee availability
+- employee feedback
+- employee-project history
+- relationship data
+- skill similarity data
 
-Upload Project PDF
-→ Extract PDF Text
-→ Validate Project PDF Structure
-→ Extract Required Skills
-→ Load Employee Dataset
-→ Build Employee Matching Features
-→ Load Trained HAF-EPA Model
-→ Predict Employee Suitability Score
-→ Filter Invalid Matches
-→ Rank Top Employees
-→ Show Results in Web UI
-→ Visualize Results with Charts
+Dataset source:
 
----
-## 📊 Available Graph Visualizations
+```text
+https://www.kaggle.com/datasets/firozfau/software-development-employee-project-dataset
+```
 
-The new graph page supports multiple chart types for better visualization of recommendation results:
-
-* Bar Chart
-* Horizontal Bar Chart
-* Line Chart
-* Pie Chart
-* Doughnut Chart
-* Radar Chart
-* Polar Area Chart
-
-The graph page also allows users to select different metrics, such as:
-
-* Match Percentage
-* Matched Skill Count
-* Skill Match Score
+The dataset is synthetic and is used for research and experimental purposes only. It does not contain real personal or organizational data.
 
 ---
+
+## Machine Learning Model
+
+The project uses:
+
+```text
+RandomForestClassifier
+```
+
+Model configuration:
+
+```python
+RandomForestClassifier(
+    n_estimators=300,
+    max_depth=14,
+    class_weight="balanced",
+    random_state=42,
+    n_jobs=-1
+)
+```
+
+The model is trained using 19 engineered features, including:
+
+- matched_skill_count
+- matched_required_skill_count
+- matched_optional_skill_count
+- employee_skill_count
+- project_skill_count
+- required_skill_count
+- optional_skill_count
+- skill_match_score
+- employee_skill_coverage
+- missing_required_skill_count
+- has_any_skill_match
+- strong_skill_match
+- weighted_skill_match_score
+- related_skill_match_score
+- avg_experience_on_required_skills
+- avg_past_performance_score
+- availability_fit_score
+- task_context_match_score
+- soft_skill_compatibility_score
+
+The target label is:
+
+```text
+1 = Suitable
+0 = Not Suitable
+```
+
 ---
-# Run code 
-### Create Virtual Environment
+
+## Installation
+
+### 1. Clone or unzip the project
+
 ```bash
-python3 -m venv venv
+cd HAF-EPA
 ```
-### Activate Virtual Environment
 
-#### macOS / Linux
+### 2. Create a virtual environment
+
+macOS/Linux:
 
 ```bash
-source venv/bin/activate
+python3 -m venv .venv
+source .venv/bin/activate
 ```
 
-#### Windows
+Windows:
 
 ```bash
-venv\Scripts\activate
+python -m venv .venv
+.venv\Scripts\activate
 ```
-### Install Required Packages
+
+### 3. Install dependencies
 
 ```bash
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
----
+
 ---
 
-## Train and Test Model
+## Run the Full Training Pipeline
+
+From the project root directory:
 
 ```bash
-python3 main.py
+python main.py
 ```
 
-## Run Web Application
+This command performs the full model pipeline:
+
+1. prepares the labelled dataset
+2. splits train/test data
+3. balances the training dataset
+4. trains the Random Forest model
+5. evaluates the model
+6. generates test recommendations
+7. exports CSV/Excel/report files
+8. creates the employee reference file required by the web application
+
+Generated files are saved in:
+
+```text
+output/
+```
+
+Important generated files:
+
+```text
+output/HAF-EPA.joblib
+output/HAF-EPA_employee_reference.csv
+output/HAF-EPA_model_evaluation.txt
+output/HAF-EPA_feature_importance.csv
+output/HAF-EPA_balanced_training_dataset.csv
+output/HAF-EPA_test_predictions.csv
+output/HAF-EPA_test_recommendations.xlsx
+output/HAF-EPA_top_200_employees.xlsx
+```
+
+---
+
+## Run the Web Application
+
+Important: run `python main.py` first. The web app requires:
+
+```text
+output/HAF-EPA.joblib
+output/HAF-EPA_employee_reference.csv
+```
+
+Then start the Flask application:
 
 ```bash
-python3 webapp/app.py
+cd webapp
+python app.py
+```
+
+Open the browser:
+
+```text
+http://127.0.0.1:5000
+```
+
+You can test the application using the sample PDFs in:
+
+```text
+webapp-test-pdf-file/
 ```
 
 ---
+
+## Web Application Workflow
+
+```text
+Upload project PDF
+        ↓
+Extract project text
+        ↓
+Validate project PDF
+        ↓
+Extract required project skills
+        ↓
+Generate employee-project feature vectors
+        ↓
+Load trained HAF-EPA model
+        ↓
+Predict ML suitability score
+        ↓
+Calculate project-skill match percentage
+        ↓
+Rank employees
+        ↓
+Show Top-10 recommendations
+```
+
+The web application displays:
+
+- uploaded file name
+- extracted project skills
+- Top-10 employees
+- project match percentage
+- ML suitability percentage
+- matched project skills
+- recommendation reason
+- bar chart visualization
+
 ---
- ## Future Work
 
-* Deep learning integration 
-* Real-time prediction
-* Explainable dashboard
+## Explainability Features
+
+The web application improves recommendation transparency by showing:
+
+- extracted skills from the uploaded PDF
+- employee skills
+- matched project skills
+- number of matched skills
+- project match percentage
+- ML suitability percentage
+- reason why the employee was recommended
+
+The current chart view intentionally uses only a bar chart because employee recommendation scores are independent ranking values. Line charts and pie charts are not suitable for this type of comparison.
 
 ---
-## 📚 Academic Summary
 
-> The HAF-EPA framework integrates machine learning and knowledge graph reasoning for employee-project allocation. The system uses a supervised learning approach with a Random Forest classifier trained on 80% of the data and evaluated on 20% unseen data. Additionally, an external dataset is used to simulate real-world prediction scenarios. The final output combines ML predictions and knowledge graph reasoning.
+## Difference Between Project Match and ML Suitability
+
+The web app separates two different values:
+
+### Project Match %
+
+This is calculated from extracted PDF skills.
+
+Example:
+
+```text
+Project skills: Data Analysis, SQL, Testing
+Employee matched: 3 of 3 skills
+Project Match = 100%
+```
+
+### ML Suitability %
+
+This is predicted by the trained Random Forest model.
+
+Example:
+
+```text
+Feature vector
+        ↓
+HAF-EPA.joblib
+        ↓
+predict_proba()
+        ↓
+ML Suitability Score
+```
+
+The ML score is not the same as the direct skill match score. It represents the model's predicted suitability probability based on the full employee-project feature vector.
 
 ---
+
+## Example Web App Output
+
+For `StockPro.pdf`, the extracted project skills may be:
+
+```text
+Data Analysis
+SQL
+Testing
+```
+
+Example recommendation table:
+
+| Rank | Employee | Project Match | ML Suitability | Matched Skills |
+|---:|---|---:|---:|---|
+| 1 | Christopher Bass | 100.00% | 10.00% | Data Analysis, SQL, Testing |
+| 2 | James Collins | 100.00% | 9.00% | Data Analysis, SQL, Testing |
+| 3 | Donna Jordan | 100.00% | 8.67% | Data Analysis, SQL, Testing |
+
+When multiple employees have the same project-skill match, the ML suitability score is used to rank them.
+
+---
+
+## Troubleshooting
+
+### Model file not found
+
+If you see:
+
+```text
+Model file not found: output/HAF-EPA.joblib
+```
+
+Run:
+
+```bash
+python main.py
+```
+
+### Employee reference file not found
+
+If you see:
+
+```text
+Employee file not found: output/HAF-EPA_employee_reference.csv
+```
+
+Run:
+
+```bash
+python main.py
+```
+
+### Uploaded PDF is not recognized
+
+The web app expects a project description PDF containing project-related sections such as:
+
+- project overview
+- project description
+- required skills
+- technical requirements
+- objectives
+- expected outcome
+
+Use the sample PDFs in:
+
+```text
+webapp-test-pdf-file/
+```
+
+---
+
+## Known Limitations
+
+- The dataset is synthetic.
+- The current web app extracts explicit skills from the project PDF.
+- Hidden skill inference is not implemented.
+- Transfer learning is not implemented.
+- The current runnable model is Random Forest based.
+- The trained model is most reliable when the new employee/project data are similar to the training dataset.
+- If a company has a very different workforce or project domain, retraining with company-specific data is recommended.
+
+---
+
+## Recommended Future Improvements
+
+- Add SHAP or LIME for feature-level explainability.
+- Improve PDF requirement extraction using NLP or transformer-based models.
+- Add hidden skill inference from project descriptions.
+- Add transfer learning or fine-tuning for cross-company model portability.
+- Add model monitoring and periodic retraining.
+- Add authentication and database persistence for production deployment.
+
+
+---
+
+## Academic Summary
+
+HAF-EPA is a research and thesis-oriented framework for employee-project allocation.
+The core contribution is the model creation, training, evaluation, and recommendation workflow.
+The Flask web application demonstrates how the trained model can be used in a practical setting.
+
 
 ## 👨‍💻 Author
 
