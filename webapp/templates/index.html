@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HAF-EPA Employee Recommender</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+  <div class="container">
+    <h1>HAF-EPA Employee Recommender</h1>
+    <p>Upload a project PDF and get the top 10 best-matched employees.</p>
+
+    <form method="POST" enctype="multipart/form-data" class="upload-form">
+      <input type="file" name="project_pdf" accept=".pdf" required />
+      <button type="submit">Upload and Predict</button>
+    </form>
+
+    {% if error %}
+      <div class="error-box">{{ error }}</div>
+    {% endif %}
+
+    {% if uploaded_filename %}
+      <div class="info-box">
+        Uploaded file: <strong>{{ uploaded_filename }}</strong>
+      </div>
+    {% endif %}
+
+    {% if recommendations %}
+      {% set project_skills = recommendations[0].project_skills if recommendations[0].project_skills is defined else [] %}
+
+      <div class="preview-box">
+        <h2>Extracted Project Skills</h2>
+        <p class="muted">These skills were detected from the uploaded PDF and used for employee-project matching.</p>
+        <div class="chip-list">
+          {% for skill in project_skills %}
+            <span class="chip project-chip">{{ skill }}</span>
+          {% endfor %}
+        </div>
+      </div>
+
+      <form action="/graph" method="post" class="graph-form">
+        <input type="hidden" name="data" value='{{ recommendations | tojson | safe }}'>
+        <button type="submit">View Bar Chart and Explanation</button>
+      </form>
+
+      <h2>Top 10 Employees</h2>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Employee ID</th>
+            <th>Name</th>
+            <th>Project Match %</th>
+            <th>ML Suitability %</th>
+            <th>Matched Project Skills</th>
+            <th>Why Recommended</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for emp in recommendations %}
+          <tr>
+            <td>{{ emp.recommendation_rank }}</td>
+            <td>{{ emp.employee_id }}</td>
+            <td><strong>{{ emp.full_name }}</strong></td>
+            <td>{{ "%.2f"|format(emp.match_percentage|float) }}%</td>
+            <td>{{ "%.2f"|format(emp.ml_prediction_percentage|float) }}%</td>
+            <td>
+              <div class="chip-list compact">
+                {% for skill in emp.matched_project_skills %}
+                  <span class="chip matched-chip">{{ skill }}</span>
+                {% endfor %}
+              </div>
+              <small>{{ emp.matched_required_skill_count }} of {{ emp.required_skill_count }} extracted skills matched</small>
+            </td>
+            <td>{{ emp.recommendation_reason }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% endif %}
+  </div>
+</body>
+</html>

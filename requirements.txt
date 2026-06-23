@@ -1,0 +1,11 @@
+flask
+werkzeug
+pandas
+numpy
+scikit-learn
+joblib
+pymupdf
+openpyxl
+matplotlib
+python-dateutil
+gunicorn

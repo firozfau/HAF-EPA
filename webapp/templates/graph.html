@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Recommendation Graphs</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='graph.css') }}" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+<div class="page">
+    <a class="back-link" href="/">← Back to recommendations</a>
+
+    {% set recs = recommendations if recommendations is defined else [] %}
+    {% set project_skills = recs[0].project_skills if recs and recs[0].project_skills is defined else [] %}
+
+    <div class="top-grid-top">
+        <div class="control-card">
+            <label for="employeeSelect">1. Employee Name</label>
+            <select id="employeeSelect">
+                <option value="all">All Employees</option>
+                {% for emp in recs %}
+                    <option value="{{ emp.full_name }}">{{ emp.full_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="control-card">
+            <label for="skillSelect">2. Skill Name</label>
+            <select id="skillSelect">
+                <option value="overall">Overall Skill</option>
+                <option value="programming">Programming Skill</option>
+                <option value="management">Management Skill</option>
+            </select>
+        </div>
+
+        <div class="control-card">
+            <label>3. Graph Choice</label>
+            <div class="fixed-choice">Bar Chart</div>
+            <input type="hidden" id="chartType" value="bar" />
+        </div>
+    </div>
+
+    <div class="info-card">
+        <h2>Extracted Project Skills</h2>
+        <p>These are the required project skills extracted from the uploaded PDF.</p>
+        <div class="skill-chip-list">
+            {% for skill in project_skills %}
+                <span class="skill-chip project-chip">{{ skill }}</span>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="chart-card">
+        <div class="section-title">
+            <div class="section-icon">📊</div>
+            <div>
+                <h2 id="chartTitle">Employee Metrics Chart</h2>
+                <p>Bar chart is used because ranking and percentage comparison are clearer in this format.</p>
+            </div>
+        </div>
+
+        <div class="chart-wrap">
+            <canvas id="recommendationChart"></canvas>
+        </div>
+    </div>
+
+    <div class="top-grid">
+        <div class="stat-card">
+            <div class="stat-icon blue">👥</div>
+            <div>
+                <div class="stat-label">Total Employees</div>
+                <div class="stat-value" id="totalEmployeesCard">{{ recs|length }}</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon green">🏆</div>
+            <div>
+                <div class="stat-label">Top Project Match</div>
+                <div class="stat-value green-text" id="topMatchCard">0%</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon orange">🧠</div>
+            <div>
+                <div class="stat-label">Top ML Suitability</div>
+                <div class="stat-value orange-text" id="mlScoreCard">0%</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon pink">📌</div>
+            <div>
+                <div class="stat-label">Avg. Matched Skills</div>
+                <div class="stat-value pink-text" id="matchedSkillCard">0</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-card">
+        <div class="section-title">
+            <div class="section-icon">🏅</div>
+            <div>
+                <h2>Top 10 Employees</h2>
+                <p>The table uses the same order as the recommendation page, so the chart and table always agree.</p>
+            </div>
+        </div>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Employee Name</th>
+                    <th><span class="dot yellow-dot"></span>Project Match</th>
+                    <th><span class="dot orange-dot"></span>ML Suitability</th>
+                    <th><span class="dot blue-dot"></span>Matched Skills</th>
+                    <th>Why Recommended</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                {% for emp in recs[:10] %}
+                <tr>
+                    <td class="orange-text">{{ emp.recommendation_rank }}</td>
+                    <td><strong>{{ emp.full_name }}</strong></td>
+                    <td class="yellow-text">{{ "%.2f"|format(emp.match_percentage|float) }}%</td>
+                    <td class="orange-text">{{ "%.2f"|format(emp.ml_prediction_percentage|float) }}%</td>
+                    <td>
+                        <div class="skill-chip-list compact">
+                            {% for skill in emp.matched_project_skills %}
+                                <span class="skill-chip matched-chip">{{ skill }}</span>
+                            {% endfor %}
+                        </div>
+                    </td>
+                    <td class="reason-cell">{{ emp.recommendation_reason }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    window.recommendations = {{ recs | tojson | safe }};
+</script>
+<script src="{{ url_for('static', filename='graph.js') }}"></script>
+</body>
+</html>
